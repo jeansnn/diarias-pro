@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Controle de Diárias Pro</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --app-bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --surface-hover: rgba(30, 41, 59, 0.9);
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: rgba(16, 185, 129, 0.15);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-light: rgba(255, 255, 255, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --warning: #f59e0b;
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Scrollbar Customizada para PC */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--app-bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 16px 16px 100px;
+        }
+
+        /* Novo Layout Responsivo */
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0 16px;
+        }
+
+        .app-header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.primary {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05));
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.1);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .stat-card.primary .stat-value {
+            color: #34d399;
+        }
+
+        .stat-trend {
+            font-size: 0.8rem;
+            margin-top: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .trend-up { color: #34d399; }
+        .trend-down { color: var(--danger); }
+
+        /* Form Card */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .card-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            background: var(--primary-light);
+            color: #34d399;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-light);
+            padding: 14px 16px 14px 48px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            color: white;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .form-control::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Filters & List */
+        .filter-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .filter-btn {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            padding: 10px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 4px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .month-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .month-total {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #34d399;
+        }
+
+        .list-item {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+            border: 1px solid var(--border-light);
+        }
+
+        .list-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(255,255,255,0.2);
+            background: var(--surface-hover);
+        }
+
+        .list-item.paid {
+            background: rgba(16, 185, 129, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Checkbox */
+        .checkbox-wrapper {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .checkbox-custom {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 2px solid var(--text-secondary);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .paid .checkbox-custom {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox-custom svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .paid .checkbox-custom svg {
+            opacity: 1;
+        }
+
+        /* Item Content */
+        .item-content {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .paid .item-title {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .item-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .paid .item-value {
+            color: var(--primary);
+        }
+
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-status {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-paid {
+            background: var(--primary-light);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        /* Modal / Bottom Sheet */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 998;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: #1e293b;
+            border-radius: 28px 28px 0 0;
+            padding: 24px 20px 40px;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 999;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            border-top: 1px solid var(--border-light);
+        }
+
+        .modal-open .modal-overlay { opacity: 1; pointer-events: auto; }
+        .modal-open .bottom-sheet { transform: translateY(0); }
+
+        .sheet-handle {
+            width: 40px; height: 4px;
+            background: var(--text-secondary);
+            border-radius: 4px;
+            margin: 0 auto 24px;
+            opacity: 0.5;
+        }
+
+        .sheet-title {
+            font-size: 1.2rem; font-weight: 700;
+            margin-bottom: 20px; text-align: center;
+        }
+
+        .sheet-option {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            font-size: 1rem; font-weight: 500;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .sheet-option:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--border-light);
+        }
+
+        .sheet-option.selected {
+            background: var(--primary-light);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        /* 💻 MEDIA QUERIES PARA PC / MODO HORIZONTAL 💻 */
+        @media (min-width: 850px) {
+            .app-container {
+                max-width: 1300px;
+                padding: 40px 32px;
+            }
+
+            .app-layout {
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 40px;
+            }
+
+            .left-panel {
+                width: 420px;
+                flex-shrink: 0;
+                position: sticky;
+                top: 40px;
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .right-panel {
+                flex: 1;
+                background: var(--surface);
+                border: 1px solid var(--border-light);
+                border-radius: var(--radius-xl);
+                padding: 32px;
+                min-height: calc(100vh - 80px);
+            }
+
+            .stats-grid { margin-bottom: 0; }
+            
+            .app-header { padding-top: 0; }
+
+            .bottom-sheet {
+                top: 50%;
+                left: 50%;
+                bottom: auto;
+                right: auto;
+                width: 450px;
+                transform: translate(-50%, -50%) scale(0.95);
+                border-radius: var(--radius-xl);
+                border: 1px solid var(--border-light);
+                opacity: 0;
+                visibility: hidden;
+                padding: 32px;
+            }
+            
+            .modal-open .bottom-sheet {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            .sheet-handle { display: none; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-layout">
+            
+            <div class="left-panel">
+                <header class="app-header">
+                    <h1>💼 Diárias Pro</h1>
+                    <div class="header-actions">
+                        <button class="icon-btn" onclick="gerarPDF()" title="Baixar Relatório PDF">📄</button>
+                        <button class="icon-btn" onclick="mostrarEstatisticas()" title="Relatório">📈</button>
+                    </div>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-label">Total do Mês</div>
+                        <div class="stat-value" id="totalMesAtual">R$ 0,00</div>
+                        <div class="stat-trend" id="tendenciaMes"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-label">A Receber</div>
+                        <div class="stat-value" id="saldoReceber">R$ 0,00</div>
+                        <div class="stat-trend" id="diasRestantes"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>➕ Novo Registro</h3>
+                        <span class="badge" id="contadorDiarias">0 diárias</span>
+                    </div>
+                    <form id="diariaForm">
+                        <div class="form-group">
+                            <label class="form-label">Data do Serviço</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📅</span>
+                                <input type="date" id="data" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Descrição da Atividade</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📋</span>
+                                <input type="text" id="atividade" class="form-control" placeholder="Ex: Produção, Colheita..." required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Valor Combinado (R$)</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">💵</span>
+                                <input type="number" id="valor" class="form-control" step="0.01" placeholder="150,00" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <span>✓</span> Salvar Diária
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="filter-section">
+                    <h3 class="filter-title">📋 Relatório de Lançamentos</h3>
+                    <button class="filter-btn" onclick="openSheet()">
+                        <span id="filtroLabel">Todos os meses</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+
+                <div id="listaContainer" class="list-container"></div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="modal-overlay" onclick="closeSheet()"></div>
+    <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Filtrar por período</div>
+        <div id="sheetOptions"></div>
+    </div>
+
+    <script>
+        // ============ LÓGICA DO APP ============
+        let diarias = JSON.parse(localStorage.getItem('minhas_diarias_pro')) || [];
+        
+        diarias = diarias.map(d => ({
+            id: d.id || Date.now() + Math.random(),
+            data: d.data || new Date().toISOString().split('T')[0],
+            atividade: d.atividade || 'Sem descrição',
+            valor: parseFloat(d.valor) || 0,
+            recebido: d.recebido !== undefined ? d.recebido : false,
+            createdAt: d.createdAt || new Date().toISOString()
+        }));
+
+        let filtroAtual = 'todos';
+        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+                           "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+        const formatCurrency = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatDate = (dataStr) => { const [y, m, d] = dataStr.split('-'); return `${d}/${m}/${y}`; };
+        const formatShortDate = (dataStr) => { const [y, m, d] = dataStr.split('-'); return `${d}/${m}`; };
+        const getMonthYear = (dataStr) => { const [y, m] = dataStr.split('-'); return `${nomesMeses[parseInt(m) - 1]} ${y}`; };
+        const getDiaSemana = (dataStr) => {
+            const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            return dias[new Date(dataStr + 'T00:00:00').getDay()];
+        };
+
+        document.getElementById('data').valueAsDate = new Date();
+
+        function salvarDados() { localStorage.setItem('minhas_diarias_pro', JSON.stringify(diarias)); }
+
+        function adicionarDiaria(diaria) {
+            diarias.push(diaria);
+            diarias.sort((a, b) => new Date(b.data) - new Date(a.data));
+            salvarDados();
+        }
+
+        function toggleStatus(id) {
+            const index = diarias.findIndex(d => d.id === id);
+            if (index > -1) {
+                diarias[index].recebido = !diarias[index].recebido;
+                salvarDados();
+                renderizarApp();
+            }
+        }
+
+        function deletarDiaria(id) {
+            if (confirm('Excluir este lançamento permanentemente?')) {
+                diarias = diarias.filter(d => d.id !== id);
+                salvarDados();
+                renderizarApp();
+            }
+        }
+
+        function calcularEstatisticas() {
+            const hoje = new Date();
+            const mesAtual = hoje.toISOString().slice(0, 7);
+            
+            let totalMes = 0; let totalPendente = 0; let totalRecebidoMes = 0;
+            const diariasMesAtual = diarias.filter(d => d.data.startsWith(mesAtual));
+            
+            diarias.forEach(d => {
+                if (d.data.startsWith(mesAtual)) {
+                    totalMes += d.valor;
+                    if (d.recebido) totalRecebidoMes += d.valor;
+                }
+                if (!d.recebido) totalPendente += d.valor;
+            });
+
+            const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString().slice(0, 7);
+            const totalMesAnterior = diarias.filter(d => d.data.startsWith(mesAnterior)).reduce((sum, d) => sum + d.valor, 0);
+            
+            let tendencia = 0; let tendenciaTexto = '';
+            if (totalMesAnterior > 0) {
+                tendencia = ((totalMes - totalMesAnterior) / totalMesAnterior) * 100;
+                tendenciaTexto = tendencia > 0 ? `↑ ${tendencia.toFixed(1)}% vs anterior` : `↓ ${Math.abs(tendencia).toFixed(1)}% vs anterior`;
+            }
+
+            const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+            const diasRestantes = ultimoDia - hoje.getDate();
+            
+            return { totalMes, totalPendente, totalRecebidoMes, tendencia, tendenciaTexto, diasRestantes, countDiariasMes: diariasMesAtual.length };
+        }
+
+        function renderizarApp() {
+            const stats = calcularEstatisticas();
+            document.getElementById('totalMesAtual').textContent = formatCurrency(stats.totalMes);
+            document.getElementById('saldoReceber').textContent = formatCurrency(stats.totalPendente);
+            
+            const tendenciaEl = document.getElementById('tendenciaMes');
+            if (stats.tendenciaTexto) {
+                tendenciaEl.textContent = stats.tendenciaTexto;
+                tendenciaEl.className = `stat-trend ${stats.tendencia > 0 ? 'trend-up' : 'trend-down'}`;
+            } else { tendenciaEl.textContent = 'Mês inicial'; }
+            
+            document.getElementById('diasRestantes').textContent = `${stats.diasRestantes} dias restantes`;
+            document.getElementById('contadorDiarias').textContent = `${diarias.length} diárias`;
+
+            renderizarLista();
+        }
+
+        function renderizarLista() {
+            const container = document.getElementById('listaContainer');
+            let diariasFiltradas = filtroAtual !== 'todos' ? diarias.filter(d => d.data.startsWith(filtroAtual)) : diarias;
+
+            if (diariasFiltradas.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:60px 20px; color:var(--text-secondary);">
+                        <div style="font-size:3rem; margin-bottom:16px;">📭</div>
+                        <div style="font-size:1.1rem; font-weight:600;">Nenhum registro encontrado</div>
+                    </div>`;
+                return;
+            }
+
+            const agrupado = {};
+            diariasFiltradas.forEach(d => {
+                const chave = d.data.slice(0, 7);
+                if (!agrupado[chave]) agrupado[chave] = { label: getMonthYear(d.data), itens: [], total: 0 };
+                agrupado[chave].itens.push(d);
+                agrupado[chave].total += d.valor;
+            });
+
+            container.innerHTML = '';
+            
+            Object.keys(agrupado).sort((a, b) => b.localeCompare(a)).forEach(chave => {
+                const grupo = agrupado[chave];
+                const monthSection = document.createElement('div');
+                monthSection.style.marginBottom = '24px';
+                monthSection.innerHTML = `
+                    <div class="month-header">
+                        <span class="month-name">${grupo.label}</span>
+                        <span class="month-total">${formatCurrency(grupo.total)}</span>
+                    </div>`;
+
+                grupo.itens.sort((a, b) => b.data.localeCompare(a.data)).forEach(item => {
+                    monthSection.appendChild(criarElementoDiaria(item));
+                });
+                container.appendChild(monthSection);
+            });
+        }
+
+        function criarElementoDiaria(item) {
+            const div = document.createElement('div');
+            div.className = `list-item ${item.recebido ? 'paid' : ''}`;
+            const diaSemana = getDiaSemana(item.data);
+            
+            div.innerHTML = `
+                <div class="checkbox-wrapper" onclick="toggleStatus(${item.id})">
+                    <div class="checkbox-custom">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="item-content" onclick="toggleStatus(${item.id})">
+                    <div class="item-header">
+                        <span class="item-title">${item.atividade}</span>
+                        <span class="item-value">${formatCurrency(item.valor)}</span>
+                    </div>
+                    <div class="item-meta">
+                        <span class="item-date">📅 ${formatShortDate(item.data)} • ${diaSemana}</span>
+                        <span class="item-status ${item.recebido ? 'status-paid' : 'status-pending'}">
+                            ${item.recebido ? '✓ Baixado' : '⏳ Pendente'}
+                        </span>
+                    </div>
+                </div>
+                <button class="btn-delete" onclick="deletarDiaria(${item.id})" title="Excluir">🗑️</button>
+            `;
+            return div;
+        }
+
+        function openSheet() { document.body.classList.add('modal-open'); construirOpcoesSheet(); }
+        function closeSheet() { document.body.classList.remove('modal-open'); }
+        function setFiltro(valor, label) { filtroAtual = valor; document.getElementById('filtroLabel').textContent = label; closeSheet(); renderizarApp(); }
+
+        function construirOpcoesSheet() {
+            const container = document.getElementById('sheetOptions');
+            const meses = new Map();
+            diarias.forEach(d => { const chave = d.data.slice(0, 7); if (!meses.has(chave)) meses.set(chave, getMonthYear(d.data)); });
+
+            let html = `
+                <div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Todos os meses')">
+                    📅 Todos os meses <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
+                </div>`;
+
+            Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
+                const count = diarias.filter(d => d.data.startsWith(chave)).length;
+                html += `
+                    <div class="sheet-option ${filtroAtual === chave ? 'selected' : ''}" onclick="setFiltro('${chave}', '${label}')">
+                        ${label} <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function gerarPDF() {
+            if (diarias.length === 0) {
+                alert("Não há diárias registradas para gerar o relatório.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            const theme = {
+                bgColor: isDarkMode ? [15, 23, 42] : [255, 255, 255],
+                titleColor: isDarkMode ? [248, 250, 252] : [15, 23, 42],
+                textBase: isDarkMode ? [148, 163, 184] : [71, 85, 105],
+                headBg: isDarkMode ? [30, 41, 59] : [241, 245, 249],
+                headText: isDarkMode ? [248, 250, 252] : [30, 41, 59],
+                rowBg: isDarkMode ? [15, 23, 42] : [255, 255, 255],
+                altRowBg: isDarkMode ? [30, 41, 59] : [248, 250, 252],
+                paidText: [52, 211, 153],
+                pendingText: [245, 158, 11]
+            };
+
+            if (isDarkMode) {
+                doc.setFillColor(...theme.bgColor);
+                doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
+            }
+
+            doc.setTextColor(...theme.titleColor);
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('Relatório de Diárias Pro', 14, 22);
+
+            const stats = calcularEstatisticas();
+            const totalGeral = diarias.reduce((sum, d) => sum + d.valor, 0);
+            const totalRecebido = diarias.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...theme.textBase);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30);
+            doc.text(`Faturamento Total: ${formatCurrency(totalGeral)}`, 14, 36);
+            doc.text(`Total Pago: ${formatCurrency(totalRecebido)}`, 14, 42);
+            doc.text(`Pendente a Receber: ${formatCurrency(stats.totalPendente)}`, 14, 48);
+
+            const dadosTabela = [...diarias]
+                .sort((a, b) => new Date(b.data) - new Date(a.data))
+                .map(d => [
+                    formatDate(d.data),
+                    d.atividade,
+                    formatCurrency(d.valor),
+                    d.recebido ? 'Pago' : 'Pendente'
+                ]);
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Data', 'Atividade', 'Valor', 'Status']],
+                body: dadosTabela,
+                theme: 'plain',
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 5,
+                    textColor: theme.textBase
+                },
+                headStyles: {
+                    fillColor: theme.headBg,
+                    textColor: theme.headText,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fillColor: theme.rowBg
+                },
+                alternateRowStyles: {
+                    fillColor: theme.altRowBg
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body') {
+                        if (data.column.index === 2) {
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        if (data.column.index === 3) {
+                            data.cell.styles.fontStyle = 'bold';
+                            if (data.cell.raw === 'Pago') {
+                                data.cell.styles.textColor = theme.paidText;
+                            } else {
+                                data.cell.styles.textColor = theme.pendingText;
+                            }
+                        }
+                    }
+                }
+            });
+
+            doc.save(`Relatorio_Diarias_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function mostrarEstatisticas() {
+            const stats = calcularEstatisticas();
+            const totalGeral = diarias.reduce((sum, d) => sum + d.valor, 0);
+            const mediaDiaria = diarias.length > 0 ? totalGeral / diarias.length : 0;
+            const totalRecebido = diarias.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
+            
+            alert(`📊 RELATÓRIO GERAL\n━━━━━━━━━━━━━━━━━━━━\n💰 Faturamento Bruto: ${formatCurrency(totalGeral)}\n✅ Total Pago: ${formatCurrency(totalRecebido)}\n⏳ A Receber: ${formatCurrency(stats.totalPendente)}\n📈 Média / Lançamento: ${formatCurrency(mediaDiaria)}\n📋 Registros Totais: ${diarias.length}\n\n📅 NESTE MÊS\n━━━━━━━━━━━━━━━━━━━━\n💵 Lançado: ${formatCurrency(stats.totalMes)}\n✓ Recebido: ${formatCurrency(stats.totalRecebidoMes)}\n📊 Trabalhos: ${stats.countDiariasMes}`);
+        }
+
+        document.getElementById('diariaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const valor = parseFloat(document.getElementById('valor').value);
+            if (valor <= 0) return alert('O valor deve ser maior que zero!');
+            
+            adicionarDiaria({
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                data: document.getElementById('data').value,
+                atividade: document.getElementById('atividade').value.trim(),
+                valor: valor,
+                recebido: false,
+                createdAt: new Date().toISOString()
+            });
+            
+            this.reset();
+            document.getElementById('data').valueAsDate = new Date();
+            renderizarApp();
+        });
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+        renderizarApp();
+    </script>
+</body>
+</html>
