@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
+        /* TEMA ESCURO (Padrão Original) */
         :root {
             --app-bg: #0f172a;
             --surface: rgba(30, 41, 59, 0.7);
@@ -18,612 +19,172 @@
             --primary-light: rgba(16, 185, 129, 0.15);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --border-light: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.08);
             --danger: #ef4444;
             --danger-bg: rgba(239, 68, 68, 0.1);
             --warning: #f59e0b;
             --radius-xl: 24px;
             --radius-lg: 16px;
             --radius-md: 12px;
-            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.3);
-            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.5);
+            --shadow-sm: 0 4px 15px -3px rgba(0,0,0,0.15);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.3);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
+        /* TEMA CLARO (Ativado automaticamente pelo sistema) */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --app-bg: #f8fafc;
+                --surface: rgba(255, 255, 255, 0.95);
+                --surface-hover: #ffffff;
+                --text-primary: #0f172a;
+                --text-secondary: #475569;
+                --border-light: rgba(0, 0, 0, 0.06);
+                --shadow-sm: 0 4px 15px -3px rgba(0,0,0,0.05);
+                --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+            }
         }
 
-        /* Scrollbar Customizada para PC */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.05); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--app-bg);
             background-image: 
-                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.06) 0px, transparent 50%);
             background-attachment: fixed;
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .app-container {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 16px 16px 100px;
-        }
-
-        /* Novo Layout Responsivo */
-        .app-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+        .app-container { max-width: 100%; margin: 0 auto; padding: 16px 16px 100px; }
+        .app-layout { display: flex; flex-direction: column; gap: 24px; }
 
         /* Header */
-        .app-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 0 16px;
-        }
+        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 16px; }
+        .app-header h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-actions { display: flex; gap: 12px; }
+        .icon-btn { background: var(--surface); backdrop-filter: blur(12px); border: 1px solid var(--border-light); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 1.25rem; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-sm); }
+        .icon-btn:hover { transform: translateY(-2px); border-color: var(--primary-light); }
 
-        .app-header h1 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .icon-btn {
-            background: var(--surface);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-light);
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .icon-btn:hover {
-            background: var(--surface-hover);
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Dashboard Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            backdrop-filter: blur(12px);
-            padding: 20px;
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--border-light);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            border-color: rgba(16, 185, 129, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .stat-card.primary {
-            background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05));
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .stat-icon {
-            font-size: 1.5rem;
-            margin-bottom: 12px;
-            background: rgba(255,255,255,0.1);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: white;
-            line-height: 1.2;
-        }
-
-        .stat-card.primary .stat-value {
-            color: #34d399;
-        }
-
-        .stat-trend {
-            font-size: 0.8rem;
-            margin-top: 8px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .trend-up { color: #34d399; }
+        /* Cards Estatísticas */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); backdrop-filter: blur(12px); padding: 20px; border-radius: var(--radius-xl); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: var(--transition); }
+        .stat-card.primary { background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.03)); border-color: rgba(16, 185, 129, 0.2); }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 12px; background: var(--border-light); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; }
+        .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; letter-spacing: -0.5px; }
+        .stat-card.primary .stat-value { color: var(--primary); }
+        .stat-trend { font-size: 0.8rem; margin-top: 8px; color: var(--text-secondary); font-weight: 500; }
+        .trend-up { color: var(--primary); }
         .trend-down { color: var(--danger); }
 
         /* Form Card */
-        .card {
-            background: var(--surface);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            border: 1px solid var(--border-light);
-            box-shadow: var(--shadow-lg);
+        .card { background: var(--surface); backdrop-filter: blur(12px); border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .card-header h3 { font-size: 1.2rem; font-weight: 700; }
+        .badge { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.1); }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-icon { position: absolute; left: 16px; color: var(--text-secondary); font-size: 1.1rem; }
+        
+        /* Otimização do Select nativo/Datalist */
+        .form-control { width: 100%; background: transparent; border: 1px solid var(--border-light); padding: 14px 16px 14px 48px; border-radius: var(--radius-md); font-size: 1rem; color: var(--text-primary); transition: var(--transition); font-family: inherit; }
+        .form-control:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
+        
+        /* Ajuste do calendário e da setinha do datalist para modo escuro */
+        @media (prefers-color-scheme: dark) { 
+            .form-control::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; } 
+            .form-control::-webkit-list-button { filter: invert(1); }
         }
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
+        .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; border: none; cursor: pointer; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); margin-top: 10px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
 
-        .card-header h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
+        /* Lançamentos e Filtros */
+        .filter-section { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 4px; flex-wrap: wrap; gap: 12px; }
+        .filter-title { font-size: 1.2rem; font-weight: 700; }
+        .filter-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-btn { background: var(--surface); border: 1px solid var(--border-light); padding: 8px 14px; border-radius: 40px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: var(--shadow-sm); transition: var(--transition); }
+        .filter-btn:hover { border-color: var(--primary); }
 
-        .badge {
-            background: var(--primary-light);
-            color: #34d399;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
+        .month-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 4px; margin: 12px 0 16px; border-bottom: 2px solid var(--border-light); }
+        .month-name { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+        .month-total { font-size: 0.95rem; font-weight: 800; background: var(--primary-light); padding: 4px 12px; border-radius: 20px; color: var(--primary); }
 
-        /* Inputs */
-        .form-group {
-            margin-bottom: 20px;
-        }
+        /* Design do Cartão */
+        .list-item { background: var(--surface); border-radius: var(--radius-lg); padding: 18px 16px 18px 24px; margin-bottom: 14px; display: flex; align-items: center; gap: 16px; transition: var(--transition); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; border: none; }
+        .list-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .list-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--warning); transition: background-color 0.4s ease; }
+        .list-item.paid::before { background: var(--primary); }
+        .list-item.paid { background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, transparent 50%); }
 
-        .form-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .checkbox-wrapper { position: relative; width: 28px; height: 28px; flex-shrink: 0; cursor: pointer; }
+        .checkbox-custom { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--text-secondary); background: transparent; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .paid .checkbox-custom { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
+        .checkbox-custom svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.2s; }
+        .paid .checkbox-custom svg { opacity: 1; }
 
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+        .item-content { flex: 1; cursor: pointer; }
+        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .item-title { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.3px; }
+        .paid .item-title { color: var(--text-secondary); text-decoration: line-through; opacity: 0.8; }
+        .item-value { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.5px; }
+        .paid .item-value { color: var(--primary); }
+        
+        .item-meta { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+        .item-date { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+        
+        .item-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending { background: var(--danger-bg); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .status-paid { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.2); }
 
-        .input-icon {
-            position: absolute;
-            left: 16px;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
+        .btn-delete { background: var(--border-light); border: none; color: var(--text-secondary); padding: 10px; border-radius: 12px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .btn-delete:hover { background: var(--danger-bg); color: var(--danger); transform: scale(1.05); }
 
-        .form-control {
-            width: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-light);
-            padding: 14px 16px 14px 48px;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            color: white;
-            transition: var(--transition);
-            font-family: inherit;
-        }
+        /* Modais */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 998; }
+        .modal-open .modal-overlay, .stats-open .modal-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(15, 23, 42, 0.9);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-        }
-
-        .form-control::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-        }
-
-        /* Buttons */
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            margin-top: 10px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-        }
-
-        /* Filters & List */
-        .filter-section {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 0 4px;
-        }
-
-        .filter-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .filter-btn {
-            background: var(--surface);
-            border: 1px solid var(--border-light);
-            padding: 10px 16px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .filter-btn:hover {
-            background: var(--surface-hover);
-            border-color: var(--primary);
-        }
-
-        .month-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 4px;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .month-name {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .month-total {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #34d399;
-        }
-
-        .list-item {
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: var(--transition);
-            border: 1px solid var(--border-light);
-        }
-
-        .list-item:hover {
-            transform: translateX(4px);
-            border-color: rgba(255,255,255,0.2);
-            background: var(--surface-hover);
-        }
-
-        .list-item.paid {
-            background: rgba(16, 185, 129, 0.05);
-            border-left: 4px solid var(--primary);
-        }
-
-        /* Checkbox */
-        .checkbox-wrapper {
-            position: relative;
-            width: 28px;
-            height: 28px;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-
-        .checkbox-custom {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            border: 2px solid var(--text-secondary);
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .paid .checkbox-custom {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .checkbox-custom svg {
-            width: 16px;
-            height: 16px;
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .paid .checkbox-custom svg {
-            opacity: 1;
-        }
-
-        /* Item Content */
-        .item-content {
-            flex: 1;
-            cursor: pointer;
-        }
-
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
-        .item-title {
-            font-weight: 600;
-            font-size: 1.05rem;
-        }
-
-        .paid .item-title {
-            color: var(--text-secondary);
-            text-decoration: line-through;
-        }
-
-        .item-value {
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-
-        .paid .item-value {
-            color: var(--primary);
-        }
-
-        .item-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .item-date {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .item-status {
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 700;
-        }
-
-        .status-pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .status-paid {
-            background: var(--primary-light);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-delete {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-delete:hover {
-            background: var(--danger-bg);
-            color: var(--danger);
-        }
-
-        /* Modal / Bottom Sheet */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 998;
-        }
-
-        .bottom-sheet {
-            position: fixed;
-            left: 0; right: 0; bottom: 0;
-            background: #1e293b;
-            border-radius: 28px 28px 0 0;
-            padding: 24px 20px 40px;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            z-index: 999;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-            border-top: 1px solid var(--border-light);
-        }
-
-        .modal-open .modal-overlay { opacity: 1; pointer-events: auto; }
+        .bottom-sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 28px 28px 0 0; padding: 24px 20px 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); z-index: 999; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--border-light); max-height: 85vh; overflow-y: auto;}
         .modal-open .bottom-sheet { transform: translateY(0); }
+        .sheet-handle { width: 40px; height: 4px; background: var(--text-secondary); border-radius: 4px; margin: 0 auto 24px; opacity: 0.5; }
+        .sheet-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; text-align: center; letter-spacing: -0.3px; }
+        .sheet-option { padding: 16px; border-radius: var(--radius-md); margin-bottom: 8px; font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: var(--transition); border: 1px solid transparent; background: rgba(0,0,0,0.02); }
+        .sheet-option:hover { background: var(--border-light); }
+        .sheet-option.selected { background: var(--primary-light); border-color: rgba(16, 185, 129, 0.2); color: var(--primary); }
 
-        .sheet-handle {
-            width: 40px; height: 4px;
-            background: var(--text-secondary);
-            border-radius: 4px;
-            margin: 0 auto 24px;
-            opacity: 0.5;
-        }
+        .stats-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--surface); backdrop-filter: blur(12px); width: 90%; max-width: 400px; border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1); max-height: 90vh; overflow-y: auto;}
+        .stats-open .stats-modal { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .stats-header h2 { font-size: 1.3rem; font-weight: 800; }
+        .btn-close { background: var(--border-light); border: none; color: var(--text-primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: var(--transition); }
+        .btn-close:hover { background: var(--danger-bg); color: var(--danger); }
+        .stats-group-title { font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 800; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px; letter-spacing: 0.5px; }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; font-weight: 500; }
+        .stats-row strong { color: var(--primary); font-weight: 800; }
 
-        .sheet-title {
-            font-size: 1.2rem; font-weight: 700;
-            margin-bottom: 20px; text-align: center;
-        }
-
-        .sheet-option {
-            padding: 16px;
-            border-radius: var(--radius-md);
-            margin-bottom: 8px;
-            font-size: 1rem; font-weight: 500;
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: var(--transition);
-            border: 1px solid transparent;
-        }
-
-        .sheet-option:hover {
-            background: rgba(255,255,255,0.05);
-            border-color: var(--border-light);
-        }
-
-        .sheet-option.selected {
-            background: var(--primary-light);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: #34d399;
-            font-weight: 700;
-        }
-
-        /* 💻 MEDIA QUERIES PARA PC / MODO HORIZONTAL 💻 */
         @media (min-width: 850px) {
-            .app-container {
-                max-width: 1300px;
-                padding: 40px 32px;
-            }
-
-            .app-layout {
-                flex-direction: row;
-                align-items: flex-start;
-                gap: 40px;
-            }
-
-            .left-panel {
-                width: 420px;
-                flex-shrink: 0;
-                position: sticky;
-                top: 40px;
-                display: flex;
-                flex-direction: column;
-                gap: 24px;
-            }
-
-            .right-panel {
-                flex: 1;
-                background: var(--surface);
-                border: 1px solid var(--border-light);
-                border-radius: var(--radius-xl);
-                padding: 32px;
-                min-height: calc(100vh - 80px);
-            }
-
+            .app-container { max-width: 1300px; padding: 40px 32px; }
+            .app-layout { flex-direction: row; align-items: flex-start; gap: 40px; }
+            .left-panel { width: 420px; flex-shrink: 0; position: sticky; top: 40px; display: flex; flex-direction: column; gap: 24px; }
+            .right-panel { flex: 1; background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 32px; min-height: calc(100vh - 80px); }
             .stats-grid { margin-bottom: 0; }
-            
             .app-header { padding-top: 0; }
-
-            .bottom-sheet {
-                top: 50%;
-                left: 50%;
-                bottom: auto;
-                right: auto;
-                width: 450px;
-                transform: translate(-50%, -50%) scale(0.95);
-                border-radius: var(--radius-xl);
-                border: 1px solid var(--border-light);
-                opacity: 0;
-                visibility: hidden;
-                padding: 32px;
-            }
-            
-            .modal-open .bottom-sheet {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-                visibility: visible;
-            }
-            
+            .bottom-sheet { top: 50%; left: 50%; bottom: auto; right: auto; width: 450px; transform: translate(-50%, -50%) scale(0.95); border-radius: var(--radius-xl); border: 1px solid var(--border-light); opacity: 0; visibility: hidden; padding: 32px; }
+            .modal-open .bottom-sheet { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
             .sheet-handle { display: none; }
         }
-
     </style>
 </head>
 <body>
@@ -634,8 +195,8 @@
                 <header class="app-header">
                     <h1>💼 Diárias Pro</h1>
                     <div class="header-actions">
-                        <button class="icon-btn" onclick="gerarPDF()" title="Baixar Relatório PDF">📄</button>
-                        <button class="icon-btn" onclick="mostrarEstatisticas()" title="Relatório">📈</button>
+                        <button class="icon-btn" onclick="abrirBottomSheet('exportar')" title="Exportar PDF">📄</button>
+                        <button class="icon-btn" onclick="mostrarEstatisticas()" title="Relatório Geral">📈</button>
                     </div>
                 </header>
 
@@ -672,7 +233,8 @@
                             <label class="form-label">Descrição da Atividade</label>
                             <div class="input-wrapper">
                                 <span class="input-icon">📋</span>
-                                <input type="text" id="atividade" class="form-control" placeholder="Ex: Produção, Colheita..." required>
+                                <input type="text" id="atividade" class="form-control" placeholder="Ex: Produção, Colheita..." list="listaAtividades" autocomplete="off" required>
+                                <datalist id="listaAtividades"></datalist>
                             </div>
                         </div>
 
@@ -693,11 +255,16 @@
 
             <div class="right-panel">
                 <div class="filter-section">
-                    <h3 class="filter-title">📋 Relatório de Lançamentos</h3>
-                    <button class="filter-btn" onclick="openSheet()">
-                        <span id="filtroLabel">Todos os meses</span>
-                        <span>▼</span>
-                    </button>
+                    <h3 class="filter-title">📋 Lançamentos</h3>
+                    <div class="filter-actions">
+                        <button class="filter-btn" onclick="abrirBottomSheet('servicos')" title="Resumo por Serviço">
+                            🏷️ Serviços
+                        </button>
+                        <button class="filter-btn" onclick="abrirBottomSheet('filtro')">
+                            <span id="filtroLabel">Todos os meses</span>
+                            <span>▼</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="listaContainer" class="list-container"></div>
@@ -706,11 +273,20 @@
         </div>
     </div>
 
-    <div class="modal-overlay" onclick="closeSheet()"></div>
-    <div class="bottom-sheet">
+    <div class="modal-overlay" onclick="fecharModais()"></div>
+    
+    <div class="bottom-sheet" id="dynamicSheet">
         <div class="sheet-handle"></div>
-        <div class="sheet-title">Filtrar por período</div>
+        <div class="sheet-title" id="sheetTitle">Opções</div>
         <div id="sheetOptions"></div>
+    </div>
+
+    <div class="stats-modal" id="modalEstatisticas">
+        <div class="stats-header">
+            <h2 id="statsModalTitle">📊 Desempenho</h2>
+            <button class="btn-close" onclick="fecharModais()">✕</button>
+        </div>
+        <div id="statsModalBody"></div>
     </div>
 
     <script>
@@ -736,12 +312,24 @@
         const getMonthYear = (dataStr) => { const [y, m] = dataStr.split('-'); return `${nomesMeses[parseInt(m) - 1]} ${y}`; };
         const getDiaSemana = (dataStr) => {
             const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            return dias[new Date(dataStr + 'T00:00:00').getDay()];
+            return dias[new Date(dataStr + 'T12:00:00').getDay()];
         };
 
         document.getElementById('data').valueAsDate = new Date();
 
         function salvarDados() { localStorage.setItem('minhas_diarias_pro', JSON.stringify(diarias)); }
+
+        // NOVO: Função que atualiza as opções do Datalist com serviços passados
+        function atualizarCategoriasDatalist() {
+            const datalist = document.getElementById('listaAtividades');
+            const categoriasUnicas = [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort();
+            
+            let optionsHtml = '';
+            categoriasUnicas.forEach(cat => {
+                optionsHtml += `<option value="${cat}">`;
+            });
+            datalist.innerHTML = optionsHtml;
+        }
 
         function adicionarDiaria(diaria) {
             diarias.push(diaria);
@@ -792,8 +380,9 @@
 
             const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
             const diasRestantes = ultimoDia - hoje.getDate();
+            const diasTrabalhadosMes = new Set(diariasMesAtual.map(d => d.data)).size;
             
-            return { totalMes, totalPendente, totalRecebidoMes, tendencia, tendenciaTexto, diasRestantes, countDiariasMes: diariasMesAtual.length };
+            return { totalMes, totalPendente, totalRecebidoMes, tendencia, tendenciaTexto, diasRestantes, countDiariasMes: diariasMesAtual.length, diasTrabalhadosMes };
         }
 
         function renderizarApp() {
@@ -810,6 +399,7 @@
             document.getElementById('diasRestantes').textContent = `${stats.diasRestantes} dias restantes`;
             document.getElementById('contadorDiarias').textContent = `${diarias.length} diárias`;
 
+            atualizarCategoriasDatalist(); // Alimenta as dicas de digitação
             renderizarLista();
         }
 
@@ -820,8 +410,8 @@
             if (diariasFiltradas.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:60px 20px; color:var(--text-secondary);">
-                        <div style="font-size:3rem; margin-bottom:16px;">📭</div>
-                        <div style="font-size:1.1rem; font-weight:600;">Nenhum registro encontrado</div>
+                        <div style="font-size:3.5rem; margin-bottom:16px;">📭</div>
+                        <div style="font-size:1.1rem; font-weight:700;">Nenhum registro encontrado</div>
                     </div>`;
                 return;
             }
@@ -861,7 +451,7 @@
             div.innerHTML = `
                 <div class="checkbox-wrapper" onclick="toggleStatus(${item.id})">
                     <div class="checkbox-custom">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </div>
@@ -872,50 +462,168 @@
                         <span class="item-value">${formatCurrency(item.valor)}</span>
                     </div>
                     <div class="item-meta">
-                        <span class="item-date">📅 ${formatShortDate(item.data)} • ${diaSemana}</span>
                         <span class="item-status ${item.recebido ? 'status-paid' : 'status-pending'}">
-                            ${item.recebido ? '✓ Baixado' : '⏳ Pendente'}
+                            ${item.recebido ? 'Recebido' : 'Pendente'}
                         </span>
+                        <span class="item-date">${formatShortDate(item.data)} • ${diaSemana}</span>
                     </div>
                 </div>
-                <button class="btn-delete" onclick="deletarDiaria(${item.id})" title="Excluir">🗑️</button>
+                <button class="btn-delete" onclick="deletarDiaria(${item.id})" title="Excluir">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                </button>
             `;
             return div;
         }
 
-        function openSheet() { document.body.classList.add('modal-open'); construirOpcoesSheet(); }
-        function closeSheet() { document.body.classList.remove('modal-open'); }
-        function setFiltro(valor, label) { filtroAtual = valor; document.getElementById('filtroLabel').textContent = label; closeSheet(); renderizarApp(); }
+        /* ==== SISTEMA DE MODAIS DINÂMICOS ==== */
+        function fecharModais() { 
+            document.body.classList.remove('modal-open');
+            document.body.classList.remove('stats-open');
+        }
 
-        function construirOpcoesSheet() {
+        function mostrarEstatisticas() {
+            document.getElementById('statsModalTitle').textContent = '📊 Desempenho';
+            
+            const stats = calcularEstatisticas();
+            const totalGeral = diarias.reduce((sum, d) => sum + d.valor, 0);
+            const mediaDiaria = diarias.length > 0 ? totalGeral / diarias.length : 0;
+            const totalRecebido = diarias.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
+            const diasTotaisTrabalhados = new Set(diarias.map(d => d.data)).size;
+
+            document.getElementById('statsModalBody').innerHTML = `
+                <div class="stats-group-title">Neste Mês</div>
+                <div class="stats-row"><span>💵 Lançado:</span> <strong>${formatCurrency(stats.totalMes)}</strong></div>
+                <div class="stats-row"><span>✓ Recebido:</span> <strong>${formatCurrency(stats.totalRecebidoMes)}</strong></div>
+                <div class="stats-row"><span>📅 Trabalhado:</span> <strong>${stats.diasTrabalhadosMes} dias</strong></div>
+                <div class="stats-row"><span>📋 Diárias:</span> <strong>${stats.countDiariasMes} itens</strong></div>
+
+                <div class="stats-group-title">Relatório Geral</div>
+                <div class="stats-row"><span>💰 Total Bruto:</span> <strong>${formatCurrency(totalGeral)}</strong></div>
+                <div class="stats-row"><span>✅ Total Recebido:</span> <strong>${formatCurrency(totalRecebido)}</strong></div>
+                <div class="stats-row"><span>⏳ A Receber:</span> <strong style="color: var(--warning)">${formatCurrency(stats.totalPendente)}</strong></div>
+                <div class="stats-row"><span>📈 Média/Diária:</span> <strong>${formatCurrency(mediaDiaria)}</strong></div>
+            `;
+            document.body.classList.add('stats-open');
+        }
+
+        // NOVO: Mostra Estatísticas específicas de um Único Serviço (Categoria)
+        function mostrarResumoServico(nomeServico) {
+            fecharModais(); // Fecha a gaveta de baixo
+            document.getElementById('statsModalTitle').textContent = '🏷️ Detalhes da Categoria';
+
+            const relatoriosDoServico = diarias.filter(d => d.atividade.trim() === nomeServico);
+            const totalBruto = relatoriosDoServico.reduce((sum, d) => sum + d.valor, 0);
+            const totalRecebido = relatoriosDoServico.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
+            const totalPendente = totalBruto - totalRecebido;
+            const diasTrabalhados = new Set(relatoriosDoServico.map(d => d.data)).size;
+
+            let historicoHtml = '';
+            // Pega as 5 mais recentes
+            const recentes = relatoriosDoServico.sort((a,b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
+            recentes.forEach(d => {
+                historicoHtml += `
+                    <div class="stats-row" style="font-weight: normal; font-size: 0.9rem;">
+                        <span>${formatShortDate(d.data)} - ${getDiaSemana(d.data)}</span>
+                        <strong style="color: ${d.recebido ? 'var(--primary)' : 'var(--warning)'}">${formatCurrency(d.valor)}</strong>
+                    </div>`;
+            });
+
+            document.getElementById('statsModalBody').innerHTML = `
+                <div style="text-align:center; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.4rem; color: var(--text-primary);">${nomeServico}</h3>
+                </div>
+                
+                <div class="stats-group-title">Resumo Financeiro</div>
+                <div class="stats-row"><span>💰 Gerado:</span> <strong>${formatCurrency(totalBruto)}</strong></div>
+                <div class="stats-row"><span>✅ Recebido:</span> <strong>${formatCurrency(totalRecebido)}</strong></div>
+                <div class="stats-row"><span>⏳ Pendente:</span> <strong style="color: var(--warning)">${formatCurrency(totalPendente)}</strong></div>
+                <div class="stats-row"><span>📅 Dias Trabalhados:</span> <strong>${diasTrabalhados} dias</strong></div>
+
+                <div class="stats-group-title">Últimos Registros</div>
+                ${historicoHtml}
+                ${relatoriosDoServico.length > 5 ? `<div style="text-align:center; font-size: 0.75rem; color: var(--text-secondary); margin-top: 10px;">Exibindo os 5 mais recentes</div>` : ''}
+            `;
+            
+            // Um pequeno delay para a transição ficar suave ao trocar de modal
+            setTimeout(() => { document.body.classList.add('stats-open'); }, 100);
+        }
+
+        function setFiltro(valor, label) { 
+            filtroAtual = valor; 
+            document.getElementById('filtroLabel').textContent = label; 
+            fecharModais(); 
+            renderizarApp(); 
+        }
+
+        // Função Master para a Gaveta Inferior
+        function abrirBottomSheet(tipo) {
+            const titleEl = document.getElementById('sheetTitle');
             const container = document.getElementById('sheetOptions');
             const meses = new Map();
             diarias.forEach(d => { const chave = d.data.slice(0, 7); if (!meses.has(chave)) meses.set(chave, getMonthYear(d.data)); });
 
-            let html = `
-                <div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Todos os meses')">
-                    📅 Todos os meses <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
-                </div>`;
+            let html = '';
 
-            Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
-                const count = diarias.filter(d => d.data.startsWith(chave)).length;
-                html += `
-                    <div class="sheet-option ${filtroAtual === chave ? 'selected' : ''}" onclick="setFiltro('${chave}', '${label}')">
-                        ${label} <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span>
-                    </div>`;
-            });
+            if (tipo === 'filtro') {
+                titleEl.textContent = 'Filtrar por período';
+                html += `<div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Todos os meses')">
+                            <span>📅 Todos os meses</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
+                         </div>`;
+                Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
+                    const count = diarias.filter(d => d.data.startsWith(chave)).length;
+                    html += `<div class="sheet-option ${filtroAtual === chave ? 'selected' : ''}" onclick="setFiltro('${chave}', '${label}')">
+                                <span>${label}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span>
+                             </div>`;
+                });
+            } else if (tipo === 'exportar') {
+                titleEl.textContent = 'Exportar PDF de qual período?';
+                html += `<div class="sheet-option" onclick="gerarPDF('todos', 'Relatório Geral')">
+                            <span>📑 Relatório Completo</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
+                         </div>`;
+                Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
+                    const count = diarias.filter(d => d.data.startsWith(chave)).length;
+                    html += `<div class="sheet-option" onclick="gerarPDF('${chave}', '${label}')">
+                                <span>📅 ${label}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span>
+                             </div>`;
+                });
+            } else if (tipo === 'servicos') {
+                titleEl.textContent = 'Escolha o Serviço';
+                const categoriasUnicas = [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort();
+                
+                if (categoriasUnicas.length === 0) {
+                    html = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Nenhum serviço registrado ainda.</div>`;
+                } else {
+                    categoriasUnicas.forEach(cat => {
+                        const count = diarias.filter(d => d.atividade.trim() === cat).length;
+                        html += `<div class="sheet-option" onclick="mostrarResumoServico('${cat}')">
+                                    <span>🏷️ ${cat}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} registros</span>
+                                 </div>`;
+                    });
+                }
+            }
+
             container.innerHTML = html;
+            document.body.classList.add('modal-open');
         }
 
-        function gerarPDF() {
-            if (diarias.length === 0) {
-                alert("Não há diárias registradas para gerar o relatório.");
+        /* ==== GERAÇÃO DE PDF INTELIGENTE ==== */
+        async function gerarPDF(periodoChave, periodoLabel) {
+            fecharModais(); 
+
+            let dadosExportacao = diarias;
+            let subtitulo = periodoLabel;
+
+            if (periodoChave !== 'todos') {
+                dadosExportacao = diarias.filter(d => d.data.startsWith(periodoChave));
+            }
+
+            if (dadosExportacao.length === 0) {
+                alert("Não há diárias registradas para este período.");
                 return;
             }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
             const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
             const theme = {
@@ -935,80 +643,77 @@
                 doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
             }
 
+            const totalGeral = dadosExportacao.reduce((sum, d) => sum + d.valor, 0);
+            const totalRecebido = dadosExportacao.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
+            const totalPendente = totalGeral - totalRecebido;
+
             doc.setTextColor(...theme.titleColor);
             doc.setFontSize(18);
             doc.setFont(undefined, 'bold');
             doc.text('Relatório de Diárias Pro', 14, 22);
-
-            const stats = calcularEstatisticas();
-            const totalGeral = diarias.reduce((sum, d) => sum + d.valor, 0);
-            const totalRecebido = diarias.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(subtitulo, 14, 28);
 
             doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
             doc.setTextColor(...theme.textBase);
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30);
-            doc.text(`Faturamento Total: ${formatCurrency(totalGeral)}`, 14, 36);
-            doc.text(`Total Pago: ${formatCurrency(totalRecebido)}`, 14, 42);
-            doc.text(`Pendente a Receber: ${formatCurrency(stats.totalPendente)}`, 14, 48);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 38);
+            doc.text(`Faturamento Total: ${formatCurrency(totalGeral)}`, 14, 44);
+            doc.text(`Total Recebido: ${formatCurrency(totalRecebido)}`, 14, 50);
+            doc.text(`Pendente a Receber: ${formatCurrency(totalPendente)}`, 14, 56);
 
-            const dadosTabela = [...diarias]
+            const dadosTabela = [...dadosExportacao]
                 .sort((a, b) => new Date(b.data) - new Date(a.data))
                 .map(d => [
                     formatDate(d.data),
                     d.atividade,
                     formatCurrency(d.valor),
-                    d.recebido ? 'Pago' : 'Pendente'
+                    d.recebido ? 'Recebido' : 'Pendente'
                 ]);
 
             doc.autoTable({
-                startY: 55,
+                startY: 65,
                 head: [['Data', 'Atividade', 'Valor', 'Status']],
                 body: dadosTabela,
                 theme: 'plain',
-                styles: {
-                    fontSize: 10,
-                    cellPadding: 5,
-                    textColor: theme.textBase
-                },
-                headStyles: {
-                    fillColor: theme.headBg,
-                    textColor: theme.headText,
-                    fontStyle: 'bold'
-                },
-                bodyStyles: {
-                    fillColor: theme.rowBg
-                },
-                alternateRowStyles: {
-                    fillColor: theme.altRowBg
-                },
+                styles: { fontSize: 10, cellPadding: 5, textColor: theme.textBase },
+                headStyles: { fillColor: theme.headBg, textColor: theme.headText, fontStyle: 'bold' },
+                bodyStyles: { fillColor: theme.rowBg },
+                alternateRowStyles: { fillColor: theme.altRowBg },
                 didParseCell: function(data) {
                     if (data.section === 'body') {
-                        if (data.column.index === 2) {
-                            data.cell.styles.fontStyle = 'bold';
-                        }
+                        if (data.column.index === 2) data.cell.styles.fontStyle = 'bold';
                         if (data.column.index === 3) {
                             data.cell.styles.fontStyle = 'bold';
-                            if (data.cell.raw === 'Pago') {
-                                data.cell.styles.textColor = theme.paidText;
-                            } else {
-                                data.cell.styles.textColor = theme.pendingText;
-                            }
+                            if (data.cell.raw === 'Recebido') data.cell.styles.textColor = theme.paidText;
+                            else data.cell.styles.textColor = theme.pendingText;
                         }
                     }
                 }
             });
 
-            doc.save(`Relatorio_Diarias_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
+            let sulfixoArquivo = periodoChave === 'todos' ? 'Geral' : periodoLabel.replace(' ', '_');
+            const fileName = `Diarias_${sulfixoArquivo}.pdf`;
 
-        function mostrarEstatisticas() {
-            const stats = calcularEstatisticas();
-            const totalGeral = diarias.reduce((sum, d) => sum + d.valor, 0);
-            const mediaDiaria = diarias.length > 0 ? totalGeral / diarias.length : 0;
-            const totalRecebido = diarias.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
-            
-            alert(`📊 RELATÓRIO GERAL\n━━━━━━━━━━━━━━━━━━━━\n💰 Faturamento Bruto: ${formatCurrency(totalGeral)}\n✅ Total Pago: ${formatCurrency(totalRecebido)}\n⏳ A Receber: ${formatCurrency(stats.totalPendente)}\n📈 Média / Lançamento: ${formatCurrency(mediaDiaria)}\n📋 Registros Totais: ${diarias.length}\n\n📅 NESTE MÊS\n━━━━━━━━━━━━━━━━━━━━\n💵 Lançado: ${formatCurrency(stats.totalMes)}\n✓ Recebido: ${formatCurrency(stats.totalRecebidoMes)}\n📊 Trabalhos: ${stats.countDiariasMes}`);
+            try {
+                const pdfBlob = doc.output('blob');
+                if (navigator.share && navigator.canShare) {
+                    const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Relatório de Diárias',
+                            text: `Segue o relatório do período: ${periodoLabel}`
+                        });
+                        return;
+                    }
+                }
+                doc.save(fileName);
+            } catch (err) {
+                console.error("Erro no compartilhamento:", err);
+                doc.save(fileName);
+            }
         }
 
         document.getElementById('diariaForm').addEventListener('submit', function(e) {
@@ -1030,7 +735,7 @@
             renderizarApp();
         });
 
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModais(); });
         renderizarApp();
     </script>
 </body>
