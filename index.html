@@ -50,7 +50,6 @@
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.05); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -78,6 +77,7 @@
         /* Cards Estatísticas */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
         .stat-card { background: var(--surface); backdrop-filter: blur(12px); padding: 20px; border-radius: var(--radius-xl); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: var(--transition); }
+        .stat-card:hover { transform: translateY(-2px); border-color: rgba(16, 185, 129, 0.3); }
         .stat-card.primary { background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.03)); border-color: rgba(16, 185, 129, 0.2); }
         .stat-icon { font-size: 1.5rem; margin-bottom: 12px; background: var(--border-light); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
         .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; }
@@ -97,16 +97,39 @@
         .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-wrapper { position: relative; display: flex; align-items: center; }
         .input-icon { position: absolute; left: 16px; color: var(--text-secondary); font-size: 1.1rem; }
-        
-        /* Otimização do Select nativo/Datalist */
         .form-control { width: 100%; background: transparent; border: 1px solid var(--border-light); padding: 14px 16px 14px 48px; border-radius: var(--radius-md); font-size: 1rem; color: var(--text-primary); transition: var(--transition); font-family: inherit; }
         .form-control:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
-        
-        /* Ajuste do calendário e da setinha do datalist para modo escuro */
         @media (prefers-color-scheme: dark) { 
             .form-control::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; } 
-            .form-control::-webkit-list-button { filter: invert(1); }
         }
+
+        /* NOVO DESIGN: Caixa de Sugestões Personalizada (Substitui o Datalist) */
+        .sugestoes-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            margin-top: 6px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: var(--shadow-lg);
+            display: none; /* Escondido por padrão */
+        }
+        .sugestao-item {
+            padding: 14px 16px 14px 48px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .sugestao-item:last-child { border-bottom: none; }
+        .sugestao-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--primary); font-weight: 600; }
 
         .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; border: none; cursor: pointer; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); margin-top: 10px; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
@@ -118,39 +141,16 @@
         .filter-btn { background: var(--surface); border: 1px solid var(--border-light); padding: 8px 14px; border-radius: 40px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: var(--shadow-sm); transition: var(--transition); }
         .filter-btn:hover { border-color: var(--primary); }
 
-        .month-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 4px; margin: 12px 0 16px; border-bottom: 2px solid var(--border-light); }
-        .month-name { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
-        .month-total { font-size: 0.95rem; font-weight: 800; background: var(--primary-light); padding: 4px 12px; border-radius: 20px; color: var(--primary); }
+        /* Design Clean dos Lançamentos (Estilo Notas/WhatsApp) */
+        .month-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); }
+        .month-name { font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); font-style: italic; }
+        .month-total { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
 
-        /* Design do Cartão */
-        .list-item { background: var(--surface); border-radius: var(--radius-lg); padding: 18px 16px 18px 24px; margin-bottom: 14px; display: flex; align-items: center; gap: 16px; transition: var(--transition); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; border: none; }
-        .list-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-        .list-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--warning); transition: background-color 0.4s ease; }
-        .list-item.paid::before { background: var(--primary); }
-        .list-item.paid { background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, transparent 50%); }
-
-        .checkbox-wrapper { position: relative; width: 28px; height: 28px; flex-shrink: 0; cursor: pointer; }
-        .checkbox-custom { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--text-secondary); background: transparent; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .paid .checkbox-custom { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
-        .checkbox-custom svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.2s; }
-        .paid .checkbox-custom svg { opacity: 1; }
-
-        .item-content { flex: 1; cursor: pointer; }
-        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .item-title { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.3px; }
-        .paid .item-title { color: var(--text-secondary); text-decoration: line-through; opacity: 0.8; }
-        .item-value { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.5px; }
-        .paid .item-value { color: var(--primary); }
-        
-        .item-meta { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
-        .item-date { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
-        
-        .item-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-pending { background: var(--danger-bg); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
-        .status-paid { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.2); }
-
-        .btn-delete { background: var(--border-light); border: none; color: var(--text-secondary); padding: 10px; border-radius: 12px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
-        .btn-delete:hover { background: var(--danger-bg); color: var(--danger); transform: scale(1.05); }
+        .list-item-clean { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border-light); transition: var(--transition); }
+        .list-item-clean:hover { background: rgba(148, 163, 184, 0.05); }
+        .list-item-clean .text-content { flex: 1; cursor: pointer; font-size: 1.05rem; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-family: inherit; }
+        .btn-delete-clean { background: none; border: none; font-size: 1.1rem; color: var(--text-secondary); opacity: 0.4; cursor: pointer; padding: 4px 8px; transition: var(--transition); }
+        .btn-delete-clean:hover { color: var(--danger); opacity: 1; }
 
         /* Modais */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 998; }
@@ -171,7 +171,7 @@
         .btn-close { background: var(--border-light); border: none; color: var(--text-primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: var(--transition); }
         .btn-close:hover { background: var(--danger-bg); color: var(--danger); }
         .stats-group-title { font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 800; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px; letter-spacing: 0.5px; }
-        .stats-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; font-weight: 500; }
+        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem; font-weight: 500; }
         .stats-row strong { color: var(--primary); font-weight: 800; }
 
         @media (min-width: 850px) {
@@ -207,7 +207,7 @@
                         <div class="stat-value" id="totalMesAtual">R$ 0,00</div>
                         <div class="stat-trend" id="tendenciaMes"></div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" onclick="mostrarPendentes()" style="cursor: pointer;" title="Clique para ver pendentes">
                         <div class="stat-icon">⏳</div>
                         <div class="stat-label">A Receber</div>
                         <div class="stat-value" id="saldoReceber">R$ 0,00</div>
@@ -233,8 +233,9 @@
                             <label class="form-label">Descrição da Atividade</label>
                             <div class="input-wrapper">
                                 <span class="input-icon">📋</span>
-                                <input type="text" id="atividade" class="form-control" placeholder="Ex: Produção, Colheita..." list="listaAtividades" autocomplete="off" required>
-                                <datalist id="listaAtividades"></datalist>
+                                <input type="text" id="atividade" class="form-control" placeholder="Ex: Produção, Colheita..." autocomplete="off" required>
+                                
+                                <div id="sugestoesContainer" class="sugestoes-box"></div>
                             </div>
                         </div>
 
@@ -257,6 +258,9 @@
                 <div class="filter-section">
                     <h3 class="filter-title">📋 Lançamentos</h3>
                     <div class="filter-actions">
+                        <button class="filter-btn" onclick="copiarLista()" title="Copiar Lançamentos para Área de Transferência">
+                            📋 Copiar
+                        </button>
                         <button class="filter-btn" onclick="abrirBottomSheet('servicos')" title="Resumo por Serviço">
                             🏷️ Serviços
                         </button>
@@ -319,17 +323,49 @@
 
         function salvarDados() { localStorage.setItem('minhas_diarias_pro', JSON.stringify(diarias)); }
 
-        // NOVO: Função que atualiza as opções do Datalist com serviços passados
-        function atualizarCategoriasDatalist() {
-            const datalist = document.getElementById('listaAtividades');
-            const categoriasUnicas = [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort();
-            
-            let optionsHtml = '';
-            categoriasUnicas.forEach(cat => {
-                optionsHtml += `<option value="${cat}">`;
-            });
-            datalist.innerHTML = optionsHtml;
+        // ============ SISTEMA DE SUGESTÕES CUSTOMIZADO ============
+        const inputAtividade = document.getElementById('atividade');
+        const boxSugestoes = document.getElementById('sugestoesContainer');
+
+        function getCategoriasUnicas() {
+            return [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort();
         }
+
+        function renderizarSugestoes(filtro = '') {
+            const categorias = getCategoriasUnicas();
+            const filtradas = categorias.filter(c => c.toLowerCase().includes(filtro.toLowerCase()));
+            
+            if (filtradas.length === 0) {
+                boxSugestoes.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            filtradas.forEach(cat => {
+                html += `<div class="sugestao-item" onclick="selecionarSugestao('${cat}')">${cat}</div>`;
+            });
+            boxSugestoes.innerHTML = html;
+            boxSugestoes.style.display = 'block';
+        }
+
+        function selecionarSugestao(valor) {
+            inputAtividade.value = valor;
+            boxSugestoes.style.display = 'none';
+            inputAtividade.focus();
+        }
+
+        // Abre as sugestões quando clica/foca no input
+        inputAtividade.addEventListener('focus', (e) => { renderizarSugestoes(e.target.value); });
+        // Filtra as sugestões enquanto digita
+        inputAtividade.addEventListener('input', (e) => { renderizarSugestoes(e.target.value); });
+
+        // Esconde a caixinha se clicar em qualquer outro lugar da tela
+        document.addEventListener('click', (e) => {
+            if (e.target !== inputAtividade && e.target !== boxSugestoes) {
+                boxSugestoes.style.display = 'none';
+            }
+        });
+        // ==========================================================
 
         function adicionarDiaria(diaria) {
             diarias.push(diaria);
@@ -347,7 +383,7 @@
         }
 
         function deletarDiaria(id) {
-            if (confirm('Excluir este lançamento permanentemente?')) {
+            if (confirm('Excluir este lançamento?')) {
                 diarias = diarias.filter(d => d.id !== id);
                 salvarDados();
                 renderizarApp();
@@ -399,7 +435,6 @@
             document.getElementById('diasRestantes').textContent = `${stats.diasRestantes} dias restantes`;
             document.getElementById('contadorDiarias').textContent = `${diarias.length} diárias`;
 
-            atualizarCategoriasDatalist(); // Alimenta as dicas de digitação
             renderizarLista();
         }
 
@@ -419,7 +454,7 @@
             const agrupado = {};
             diariasFiltradas.forEach(d => {
                 const chave = d.data.slice(0, 7);
-                if (!agrupado[chave]) agrupado[chave] = { label: getMonthYear(d.data), itens: [], total: 0 };
+                if (!agrupado[chave]) agrupado[chave] = { label: getMonthYear(d.data).split(' ')[0], itens: [], total: 0 };
                 agrupado[chave].itens.push(d);
                 agrupado[chave].total += d.valor;
             });
@@ -429,14 +464,13 @@
             Object.keys(agrupado).sort((a, b) => b.localeCompare(a)).forEach(chave => {
                 const grupo = agrupado[chave];
                 const monthSection = document.createElement('div');
-                monthSection.style.marginBottom = '24px';
                 monthSection.innerHTML = `
                     <div class="month-header">
                         <span class="month-name">${grupo.label}</span>
-                        <span class="month-total">${formatCurrency(grupo.total)}</span>
+                        <span class="month-total">Total ${grupo.label} ${grupo.total.toFixed(2).replace('.', ',')}</span>
                     </div>`;
 
-                grupo.itens.sort((a, b) => b.data.localeCompare(a.data)).forEach(item => {
+                grupo.itens.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(item => {
                     monthSection.appendChild(criarElementoDiaria(item));
                 });
                 container.appendChild(monthSection);
@@ -445,34 +479,56 @@
 
         function criarElementoDiaria(item) {
             const div = document.createElement('div');
-            div.className = `list-item ${item.recebido ? 'paid' : ''}`;
-            const diaSemana = getDiaSemana(item.data);
+            div.className = `list-item-clean`;
             
+            const textColor = item.recebido ? 'var(--text-secondary)' : 'var(--text-primary)';
+            const textDecor = item.recebido ? 'text-decoration: line-through; opacity: 0.7;' : '';
+
             div.innerHTML = `
-                <div class="checkbox-wrapper" onclick="toggleStatus(${item.id})">
-                    <div class="checkbox-custom">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    </div>
+                <div class="text-content" onclick="toggleStatus(${item.id})">
+                    <span style="color: var(--text-secondary); min-width: 45px;">${formatShortDate(item.data)}</span> 
+                    <span style="color: var(--text-secondary);"> - </span>
+                    <span style="color: ${textColor}; ${textDecor}">${item.atividade}</span>
+                    <span style="margin-left: 2px; color: ${textColor}; ${textDecor}">${item.valor.toFixed(2).replace('.', ',')}</span>
+                    ${item.recebido ? '<span style="margin-left: 4px; font-size: 1.1rem;">✅</span>' : ''}
                 </div>
-                <div class="item-content" onclick="toggleStatus(${item.id})">
-                    <div class="item-header">
-                        <span class="item-title">${item.atividade}</span>
-                        <span class="item-value">${formatCurrency(item.valor)}</span>
-                    </div>
-                    <div class="item-meta">
-                        <span class="item-status ${item.recebido ? 'status-paid' : 'status-pending'}">
-                            ${item.recebido ? 'Recebido' : 'Pendente'}
-                        </span>
-                        <span class="item-date">${formatShortDate(item.data)} • ${diaSemana}</span>
-                    </div>
-                </div>
-                <button class="btn-delete" onclick="deletarDiaria(${item.id})" title="Excluir">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
-                </button>
+                <button class="btn-delete-clean" onclick="deletarDiaria(${item.id})" title="Excluir">🗑️</button>
             `;
             return div;
+        }
+
+        async function copiarLista() {
+            let texto = "";
+            let diariasFiltradas = filtroAtual !== 'todos' ? diarias.filter(d => d.data.startsWith(filtroAtual)) : diarias;
+
+            if (diariasFiltradas.length === 0) return alert("Nada para copiar.");
+
+            const agrupado = {};
+            diariasFiltradas.forEach(d => {
+                const chave = d.data.slice(0, 7);
+                if (!agrupado[chave]) agrupado[chave] = { label: getMonthYear(d.data).split(' ')[0], itens: [], total: 0 };
+                agrupado[chave].itens.push(d);
+                agrupado[chave].total += d.valor;
+            });
+
+            Object.keys(agrupado).sort((a, b) => b.localeCompare(a)).forEach(chave => {
+                const grupo = agrupado[chave];
+                texto += `${grupo.label}\n\n`;
+
+                grupo.itens.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(item => {
+                    const check = item.recebido ? ' ✅' : '';
+                    texto += `${formatShortDate(item.data)} - ${item.atividade} ${item.valor.toFixed(2).replace('.', ',')}${check}\n`;
+                });
+
+                texto += `\nTotal ${grupo.label} ${grupo.total.toFixed(2).replace('.', ',')}\n\n`;
+            });
+
+            try {
+                await navigator.clipboard.writeText(texto.trim());
+                alert("📋 Lista copiada com sucesso!\nPronta para colar no WhatsApp.");
+            } catch (err) {
+                alert("Erro ao copiar. Tente selecionar o texto manualmente.");
+            }
         }
 
         /* ==== SISTEMA DE MODAIS DINÂMICOS ==== */
@@ -483,7 +539,6 @@
 
         function mostrarEstatisticas() {
             document.getElementById('statsModalTitle').textContent = '📊 Desempenho';
-            
             const stats = calcularEstatisticas();
             const totalGeral = diarias.reduce((sum, d) => sum + d.valor, 0);
             const mediaDiaria = diarias.length > 0 ? totalGeral / diarias.length : 0;
@@ -506,10 +561,33 @@
             document.body.classList.add('stats-open');
         }
 
-        // NOVO: Mostra Estatísticas específicas de um Único Serviço (Categoria)
+        function mostrarPendentes() {
+            document.getElementById('statsModalTitle').textContent = '⏳ Valores A Receber';
+            const pendentes = diarias.filter(d => !d.recebido).sort((a, b) => new Date(a.data) - new Date(b.data));
+
+            if (pendentes.length === 0) {
+                document.getElementById('statsModalBody').innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Tudo em dia! 🎉 Nenhuma diária pendente.</div>`;
+            } else {
+                let html = '<div style="max-height: 60vh; overflow-y: auto;">';
+                pendentes.forEach(d => {
+                    html += `
+                        <div class="stats-row" style="border-bottom: 1px solid var(--border-light); padding-bottom: 8px; margin-bottom: 8px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">${formatShortDate(d.data)} - ${getDiaSemana(d.data)}</span>
+                                <span style="font-weight: 600;">${d.atividade}</span>
+                            </div>
+                            <strong style="color: var(--warning); display:flex; align-items:center;">${formatCurrency(d.valor)}</strong>
+                        </div>`;
+                });
+                html += '</div>';
+                document.getElementById('statsModalBody').innerHTML = html;
+            }
+            document.body.classList.add('stats-open');
+        }
+
         function mostrarResumoServico(nomeServico) {
-            fecharModais(); // Fecha a gaveta de baixo
-            document.getElementById('statsModalTitle').textContent = '🏷️ Detalhes da Categoria';
+            fecharModais(); 
+            document.getElementById('statsModalTitle').textContent = '🏷️ Categoria';
 
             const relatoriosDoServico = diarias.filter(d => d.atividade.trim() === nomeServico);
             const totalBruto = relatoriosDoServico.reduce((sum, d) => sum + d.valor, 0);
@@ -518,7 +596,6 @@
             const diasTrabalhados = new Set(relatoriosDoServico.map(d => d.data)).size;
 
             let historicoHtml = '';
-            // Pega as 5 mais recentes
             const recentes = relatoriosDoServico.sort((a,b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
             recentes.forEach(d => {
                 historicoHtml += `
@@ -537,14 +614,12 @@
                 <div class="stats-row"><span>💰 Gerado:</span> <strong>${formatCurrency(totalBruto)}</strong></div>
                 <div class="stats-row"><span>✅ Recebido:</span> <strong>${formatCurrency(totalRecebido)}</strong></div>
                 <div class="stats-row"><span>⏳ Pendente:</span> <strong style="color: var(--warning)">${formatCurrency(totalPendente)}</strong></div>
-                <div class="stats-row"><span>📅 Dias Trabalhados:</span> <strong>${diasTrabalhados} dias</strong></div>
+                <div class="stats-row"><span>📅 Trabalhado:</span> <strong>${diasTrabalhados} dias</strong></div>
 
                 <div class="stats-group-title">Últimos Registros</div>
                 ${historicoHtml}
                 ${relatoriosDoServico.length > 5 ? `<div style="text-align:center; font-size: 0.75rem; color: var(--text-secondary); margin-top: 10px;">Exibindo os 5 mais recentes</div>` : ''}
             `;
-            
-            // Um pequeno delay para a transição ficar suave ao trocar de modal
             setTimeout(() => { document.body.classList.add('stats-open'); }, 100);
         }
 
@@ -555,7 +630,6 @@
             renderizarApp(); 
         }
 
-        // Função Master para a Gaveta Inferior
         function abrirBottomSheet(tipo) {
             const titleEl = document.getElementById('sheetTitle');
             const container = document.getElementById('sheetOptions');
@@ -588,7 +662,7 @@
                 });
             } else if (tipo === 'servicos') {
                 titleEl.textContent = 'Escolha o Serviço';
-                const categoriasUnicas = [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort();
+                const categoriasUnicas = getCategoriasUnicas();
                 
                 if (categoriasUnicas.length === 0) {
                     html = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Nenhum serviço registrado ainda.</div>`;
@@ -606,10 +680,8 @@
             document.body.classList.add('modal-open');
         }
 
-        /* ==== GERAÇÃO DE PDF INTELIGENTE ==== */
         async function gerarPDF(periodoChave, periodoLabel) {
             fecharModais(); 
-
             let dadosExportacao = diarias;
             let subtitulo = periodoLabel;
 
@@ -617,10 +689,7 @@
                 dadosExportacao = diarias.filter(d => d.data.startsWith(periodoChave));
             }
 
-            if (dadosExportacao.length === 0) {
-                alert("Não há diárias registradas para este período.");
-                return;
-            }
+            if (dadosExportacao.length === 0) return alert("Não há diárias registradas para este período.");
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -651,11 +720,9 @@
             doc.setFontSize(18);
             doc.setFont(undefined, 'bold');
             doc.text('Relatório de Diárias Pro', 14, 22);
-            
             doc.setFontSize(12);
             doc.setFont(undefined, 'normal');
             doc.text(subtitulo, 14, 28);
-
             doc.setFontSize(10);
             doc.setTextColor(...theme.textBase);
             doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 38);
@@ -665,12 +732,7 @@
 
             const dadosTabela = [...dadosExportacao]
                 .sort((a, b) => new Date(b.data) - new Date(a.data))
-                .map(d => [
-                    formatDate(d.data),
-                    d.atividade,
-                    formatCurrency(d.valor),
-                    d.recebido ? 'Recebido' : 'Pendente'
-                ]);
+                .map(d => [formatDate(d.data), d.atividade, formatCurrency(d.valor), d.recebido ? 'Recebido' : 'Pendente']);
 
             doc.autoTable({
                 startY: 65,
@@ -701,19 +763,12 @@
                 if (navigator.share && navigator.canShare) {
                     const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
                     if (navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: 'Relatório de Diárias',
-                            text: `Segue o relatório do período: ${periodoLabel}`
-                        });
+                        await navigator.share({ files: [file], title: 'Relatório', text: `Relatório: ${periodoLabel}` });
                         return;
                     }
                 }
                 doc.save(fileName);
-            } catch (err) {
-                console.error("Erro no compartilhamento:", err);
-                doc.save(fileName);
-            }
+            } catch (err) { doc.save(fileName); }
         }
 
         document.getElementById('diariaForm').addEventListener('submit', function(e) {
