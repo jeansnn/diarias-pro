@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* TEMA ESCURO (Padrão Original) */
+        /* TEMA ESCURO (Padrão) */
         :root {
             --app-bg: #0f172a;
             --surface: rgba(30, 41, 59, 0.7);
@@ -31,18 +31,16 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* TEMA CLARO (Ativado automaticamente pelo sistema) */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --app-bg: #f8fafc;
-                --surface: rgba(255, 255, 255, 0.95);
-                --surface-hover: #ffffff;
-                --text-primary: #0f172a;
-                --text-secondary: #475569;
-                --border-light: rgba(0, 0, 0, 0.06);
-                --shadow-sm: 0 4px 15px -3px rgba(0,0,0,0.05);
-                --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
-            }
+        /* TEMA CLARO (Controlado por classe CSS agora, blindado contra o bloqueio do Android) */
+        body.light-mode {
+            --app-bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-hover: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border-light: rgba(0, 0, 0, 0.06);
+            --shadow-sm: 0 4px 15px -3px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
@@ -99,35 +97,11 @@
         .input-icon { position: absolute; left: 16px; color: var(--text-secondary); font-size: 1.1rem; }
         .form-control { width: 100%; background: transparent; border: 1px solid var(--border-light); padding: 14px 16px 14px 48px; border-radius: var(--radius-md); font-size: 1rem; color: var(--text-primary); transition: var(--transition); font-family: inherit; }
         .form-control:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
-        @media (prefers-color-scheme: dark) { 
-            .form-control::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; } 
-        }
+        
+        body:not(.light-mode) .form-control::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; } 
 
-        /* NOVO DESIGN: Caixa de Sugestões Personalizada (Substitui o Datalist) */
-        .sugestoes-box {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            margin-top: 6px;
-            max-height: 220px;
-            overflow-y: auto;
-            z-index: 50;
-            box-shadow: var(--shadow-lg);
-            display: none; /* Escondido por padrão */
-        }
-        .sugestao-item {
-            padding: 14px 16px 14px 48px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-light);
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
+        .sugestoes-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: var(--radius-md); margin-top: 6px; max-height: 220px; overflow-y: auto; z-index: 50; box-shadow: var(--shadow-lg); display: none; }
+        .sugestao-item { padding: 14px 16px 14px 48px; cursor: pointer; border-bottom: 1px solid var(--border-light); color: var(--text-primary); font-size: 0.95rem; transition: var(--transition); }
         .sugestao-item:last-child { border-bottom: none; }
         .sugestao-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--primary); font-weight: 600; }
 
@@ -141,7 +115,6 @@
         .filter-btn { background: var(--surface); border: 1px solid var(--border-light); padding: 8px 14px; border-radius: 40px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: var(--shadow-sm); transition: var(--transition); }
         .filter-btn:hover { border-color: var(--primary); }
 
-        /* Design Clean dos Lançamentos (Estilo Notas/WhatsApp) */
         .month-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); }
         .month-name { font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); font-style: italic; }
         .month-total { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
@@ -195,6 +168,7 @@
                 <header class="app-header">
                     <h1>💼 Diárias Pro</h1>
                     <div class="header-actions">
+                        <button class="icon-btn" id="btnThemeToggle" onclick="toggleTemaManual()" title="Mudar Tema">☀️</button>
                         <button class="icon-btn" onclick="abrirBottomSheet('exportar')" title="Exportar PDF">📄</button>
                         <button class="icon-btn" onclick="mostrarEstatisticas()" title="Relatório Geral">📈</button>
                     </div>
@@ -234,7 +208,6 @@
                             <div class="input-wrapper">
                                 <span class="input-icon">📋</span>
                                 <input type="text" id="atividade" class="form-control" placeholder="Ex: Produção, Colheita..." autocomplete="off" required>
-                                
                                 <div id="sugestoesContainer" class="sugestoes-box"></div>
                             </div>
                         </div>
@@ -265,7 +238,7 @@
                             🏷️ Serviços
                         </button>
                         <button class="filter-btn" onclick="abrirBottomSheet('filtro')">
-                            <span id="filtroLabel">Todos os meses</span>
+                            <span id="filtroLabel">Meses</span>
                             <span>▼</span>
                         </button>
                     </div>
@@ -294,6 +267,28 @@
     </div>
 
     <script>
+        // ============ SISTEMA DE TEMA MANUAL (BLINDADO) ============
+        // Executa imediatamente ao abrir o app
+        const btnTheme = document.getElementById('btnThemeToggle');
+        
+        function carregarTema() {
+            const temaSalvo = localStorage.getItem('theme_diarias');
+            if (temaSalvo === 'light') {
+                document.body.classList.add('light-mode');
+                btnTheme.textContent = '🌙';
+            } else {
+                document.body.classList.remove('light-mode');
+                btnTheme.textContent = '☀️';
+            }
+        }
+        
+        function toggleTemaManual() {
+            const isLightAgora = document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme_diarias', isLightAgora ? 'light' : 'dark');
+            btnTheme.textContent = isLightAgora ? '🌙' : '☀️';
+        }
+        carregarTema(); // Inicia o tema correto na hora
+
         // ============ LÓGICA DO APP ============
         let diarias = JSON.parse(localStorage.getItem('minhas_diarias_pro')) || [];
         
@@ -354,12 +349,9 @@
             inputAtividade.focus();
         }
 
-        // Abre as sugestões quando clica/foca no input
         inputAtividade.addEventListener('focus', (e) => { renderizarSugestoes(e.target.value); });
-        // Filtra as sugestões enquanto digita
         inputAtividade.addEventListener('input', (e) => { renderizarSugestoes(e.target.value); });
 
-        // Esconde a caixinha se clicar em qualquer outro lugar da tela
         document.addEventListener('click', (e) => {
             if (e.target !== inputAtividade && e.target !== boxSugestoes) {
                 boxSugestoes.style.display = 'none';
@@ -640,8 +632,8 @@
 
             if (tipo === 'filtro') {
                 titleEl.textContent = 'Filtrar por período';
-                html += `<div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Todos os meses')">
-                            <span>📅 Todos os meses</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
+                html += `<div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Meses')">
+                            <span>📅 Meses</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
                          </div>`;
                 Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
                     const count = diarias.filter(d => d.data.startsWith(chave)).length;
@@ -680,6 +672,7 @@
             document.body.classList.add('modal-open');
         }
 
+        // ============ SISTEMA DE PDF BLINDADO ============
         async function gerarPDF(periodoChave, periodoLabel) {
             fecharModais(); 
             let dadosExportacao = diarias;
@@ -693,7 +686,7 @@
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDarkMode = document.body.classList.contains('light-mode') === false;
 
             const theme = {
                 bgColor: isDarkMode ? [15, 23, 42] : [255, 255, 255],
@@ -759,16 +752,33 @@
             const fileName = `Diarias_${sulfixoArquivo}.pdf`;
 
             try {
-                const pdfBlob = doc.output('blob');
+                // Tenta compartilhar nativamente (Funciona no navegador e em alguns apps)
                 if (navigator.share && navigator.canShare) {
+                    const pdfBlob = doc.output('blob');
                     const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
                     if (navigator.canShare({ files: [file] })) {
                         await navigator.share({ files: [file], title: 'Relatório', text: `Relatório: ${periodoLabel}` });
                         return;
                     }
                 }
-                doc.save(fileName);
-            } catch (err) { doc.save(fileName); }
+                
+                // Se não deu pra compartilhar, força erro pra cair no Catch (Visualizador embutido)
+                throw new Error("Compartilhamento bloqueado pelo WebView.");
+                
+            } catch (err) { 
+                // SOLUÇÃO PARA O KODULAR: Em vez de baixar e sumir, abre o PDF na cara do usuário!
+                const base64PDF = doc.output('datauristring');
+                
+                document.getElementById('statsModalTitle').textContent = '📄 Visualizador de PDF';
+                document.getElementById('statsModalBody').innerHTML = `
+                    <div style="font-size: 0.85rem; color: var(--warning); text-align: center; margin-bottom: 12px; font-weight: bold;">
+                        Visualização ativada. Tire um print ou use o botão de compartilhar.
+                    </div>
+                    <iframe src="${base64PDF}" style="width: 100%; height: 55vh; border: none; border-radius: 8px; background: white;"></iframe>
+                `;
+                
+                document.body.classList.add('stats-open');
+            }
         }
 
         document.getElementById('diariaForm').addEventListener('submit', function(e) {
