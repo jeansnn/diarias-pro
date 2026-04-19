@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Controle de Diárias Pro</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <title>Controle de Diárias</title>
 
     <style>
-        /* TEMA ESCURO (Padrão) */
+        /* TEMA ESCURO (Padrão Original) */
         :root {
             --app-bg: #0f172a;
             --surface: rgba(30, 41, 59, 0.7);
@@ -28,10 +25,11 @@
             --radius-md: 12px;
             --shadow-sm: 0 4px 15px -3px rgba(0,0,0,0.15);
             --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.3);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Transição mais suave e longa para evitar efeito 'seco' */
+            --transition: all 0.4s ease-in-out;
         }
 
-        /* TEMA CLARO (Controlado por classe CSS agora, blindado contra o bloqueio do Android) */
+        /* TEMA CLARO */
         body.light-mode {
             --app-bg: #f8fafc;
             --surface: rgba(255, 255, 255, 0.95);
@@ -49,6 +47,7 @@
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.05); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
 
+        /* Animação suave global de cores aplicada ao Body e Elementos */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--app-bg);
@@ -59,7 +58,20 @@
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.5;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .stat-card, .card, .icon-btn, .filter-btn, .bottom-sheet, .stats-modal, .custom-dialog, .form-control {
+            transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, color 0.5s ease, transform 0.3s ease;
+        }
+
+        /* FUNÇÃO PRIVACIDADE: Efeito de desfoque nos valores */
+        body.privacy-active .hideable-value {
+            filter: blur(5px);
+            opacity: 0.7;
+            pointer-events: none;
+            user-select: none;
+            transition: filter 0.4s ease, opacity 0.4s ease;
         }
 
         .app-container { max-width: 100%; margin: 0 auto; padding: 16px 16px 100px; }
@@ -67,85 +79,100 @@
 
         /* Header */
         .app-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 16px; }
-        .app-header h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-header h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: color 0.5s ease; }
         .header-actions { display: flex; gap: 12px; }
-        .icon-btn { background: var(--surface); backdrop-filter: blur(12px); border: 1px solid var(--border-light); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 1.25rem; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-sm); }
+        .icon-btn { background: var(--surface); backdrop-filter: blur(12px); border: 1px solid var(--border-light); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 1.25rem; cursor: pointer; box-shadow: var(--shadow-sm); }
         .icon-btn:hover { transform: translateY(-2px); border-color: var(--primary-light); }
 
         /* Cards Estatísticas */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: var(--surface); backdrop-filter: blur(12px); padding: 20px; border-radius: var(--radius-xl); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: var(--transition); }
+        .stat-card { background: var(--surface); backdrop-filter: blur(12px); padding: 20px; border-radius: var(--radius-xl); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); }
         .stat-card:hover { transform: translateY(-2px); border-color: rgba(16, 185, 129, 0.3); }
         .stat-card.primary { background: linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.03)); border-color: rgba(16, 185, 129, 0.2); }
-        .stat-icon { font-size: 1.5rem; margin-bottom: 12px; background: var(--border-light); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; }
-        .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; letter-spacing: -0.5px; }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 12px; background: var(--border-light); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: background-color 0.5s ease;}
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; transition: color 0.5s ease;}
+        .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; letter-spacing: -0.5px; transition: filter 0.4s ease, color 0.5s ease; }
         .stat-card.primary .stat-value { color: var(--primary); }
-        .stat-trend { font-size: 0.8rem; margin-top: 8px; color: var(--text-secondary); font-weight: 500; }
+        .stat-trend { font-size: 0.8rem; margin-top: 8px; color: var(--text-secondary); font-weight: 500; transition: color 0.5s ease;}
         .trend-up { color: var(--primary); }
         .trend-down { color: var(--danger); }
 
         /* Form Card */
         .card { background: var(--surface); backdrop-filter: blur(12px); border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); }
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .card-header h3 { font-size: 1.2rem; font-weight: 700; }
-        .badge { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.1); }
+        .card-header h3 { font-size: 1.2rem; font-weight: 700; transition: color 0.5s ease;}
+        .badge { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.1); transition: background-color 0.5s ease;}
         
         .form-group { margin-bottom: 20px; }
-        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.5s ease;}
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        .input-icon { position: absolute; left: 16px; color: var(--text-secondary); font-size: 1.1rem; }
-        .form-control { width: 100%; background: transparent; border: 1px solid var(--border-light); padding: 14px 16px 14px 48px; border-radius: var(--radius-md); font-size: 1rem; color: var(--text-primary); transition: var(--transition); font-family: inherit; }
+        .input-icon { position: absolute; left: 16px; color: var(--text-secondary); font-size: 1.1rem; transition: color 0.5s ease;}
+        .form-control { width: 100%; background: transparent; border: 1px solid var(--border-light); padding: 14px 16px 14px 48px; border-radius: var(--radius-md); font-size: 1rem; color: var(--text-primary); font-family: inherit; }
         .form-control:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
         
         body:not(.light-mode) .form-control::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; } 
 
-        .sugestoes-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: var(--radius-md); margin-top: 6px; max-height: 220px; overflow-y: auto; z-index: 50; box-shadow: var(--shadow-lg); display: none; }
-        .sugestao-item { padding: 14px 16px 14px 48px; cursor: pointer; border-bottom: 1px solid var(--border-light); color: var(--text-primary); font-size: 0.95rem; transition: var(--transition); }
+        .sugestoes-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: var(--radius-md); margin-top: 6px; max-height: 220px; overflow-y: auto; z-index: 50; box-shadow: var(--shadow-lg); display: none; transition: background-color 0.5s ease, border-color 0.5s ease;}
+        .sugestao-item { padding: 14px 16px 14px 48px; cursor: pointer; border-bottom: 1px solid var(--border-light); color: var(--text-primary); font-size: 0.95rem; transition: background-color 0.2s ease, color 0.2s ease; }
         .sugestao-item:last-child { border-bottom: none; }
         .sugestao-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--primary); font-weight: 600; }
 
-        .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; border: none; cursor: pointer; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); margin-top: 10px; }
+        .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; border: none; cursor: pointer; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); margin-top: 10px; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
 
         /* Lançamentos e Filtros */
         .filter-section { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 0 4px; flex-wrap: wrap; gap: 12px; }
-        .filter-title { font-size: 1.2rem; font-weight: 700; }
+        .filter-title { font-size: 1.2rem; font-weight: 700; transition: color 0.5s ease;}
         .filter-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .filter-btn { background: var(--surface); border: 1px solid var(--border-light); padding: 8px 14px; border-radius: 40px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: var(--shadow-sm); transition: var(--transition); }
+        .filter-btn { background: var(--surface); border: 1px solid var(--border-light); padding: 8px 14px; border-radius: 40px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: var(--shadow-sm); }
         .filter-btn:hover { border-color: var(--primary); }
 
-        .month-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); }
-        .month-name { font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); font-style: italic; }
-        .month-total { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
+        .month-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); transition: border-color 0.5s ease;}
+        .month-name { font-size: 1.15rem; font-weight: 600; color: var(--text-secondary); font-style: italic; transition: color 0.5s ease;}
+        .month-total { font-size: 1rem; font-weight: 600; color: var(--text-primary); transition: filter 0.4s ease, color 0.5s ease; }
 
-        .list-item-clean { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border-light); transition: var(--transition); }
+        .list-item-clean { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--border-light); transition: background-color 0.3s ease, border-color 0.5s ease; }
         .list-item-clean:hover { background: rgba(148, 163, 184, 0.05); }
         .list-item-clean .text-content { flex: 1; cursor: pointer; font-size: 1.05rem; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-family: inherit; }
-        .btn-delete-clean { background: none; border: none; font-size: 1.1rem; color: var(--text-secondary); opacity: 0.4; cursor: pointer; padding: 4px 8px; transition: var(--transition); }
+        .item-value { transition: filter 0.4s ease, color 0.5s ease; }
+        .btn-delete-clean { background: none; border: none; font-size: 1.1rem; color: var(--text-secondary); opacity: 0.4; cursor: pointer; padding: 4px 8px; transition: color 0.3s ease, opacity 0.3s ease; }
         .btn-delete-clean:hover { color: var(--danger); opacity: 1; }
 
         /* Modais */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 998; }
-        .modal-open .modal-overlay, .stats-open .modal-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 998; }
+        .modal-open .modal-overlay, .stats-open .modal-overlay, .dialog-open .modal-overlay { opacity: 1; visibility: visible; pointer-events: auto; }
 
-        .bottom-sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 28px 28px 0 0; padding: 24px 20px 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); z-index: 999; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--border-light); max-height: 85vh; overflow-y: auto;}
+        .bottom-sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 28px 28px 0 0; padding: 24px 20px 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.5s ease; z-index: 999; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); border-top: 1px solid var(--border-light); max-height: 85vh; overflow-y: auto;}
         .modal-open .bottom-sheet { transform: translateY(0); }
-        .sheet-handle { width: 40px; height: 4px; background: var(--text-secondary); border-radius: 4px; margin: 0 auto 24px; opacity: 0.5; }
-        .sheet-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; text-align: center; letter-spacing: -0.3px; }
-        .sheet-option { padding: 16px; border-radius: var(--radius-md); margin-bottom: 8px; font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: var(--transition); border: 1px solid transparent; background: rgba(0,0,0,0.02); }
+        .sheet-handle { width: 40px; height: 4px; background: var(--text-secondary); border-radius: 4px; margin: 0 auto 24px; opacity: 0.5; transition: background-color 0.5s ease;}
+        .sheet-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; text-align: center; letter-spacing: -0.3px; transition: color 0.5s ease;}
+        .sheet-option { padding: 16px; border-radius: var(--radius-md); margin-bottom: 8px; font-size: 1rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background-color 0.3s ease, border-color 0.3s ease; border: 1px solid transparent; background: rgba(0,0,0,0.02); }
         .sheet-option:hover { background: var(--border-light); }
         .sheet-option.selected { background: var(--primary-light); border-color: rgba(16, 185, 129, 0.2); color: var(--primary); }
 
-        .stats-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--surface); backdrop-filter: blur(12px); width: 90%; max-width: 400px; border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1); max-height: 90vh; overflow-y: auto;}
+        .stats-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--surface); backdrop-filter: blur(12px); width: 90%; max-width: 400px; border-radius: var(--radius-xl); padding: 24px; border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); max-height: 90vh; overflow-y: auto;}
         .stats-open .stats-modal { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
         .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .stats-header h2 { font-size: 1.3rem; font-weight: 800; }
-        .btn-close { background: var(--border-light); border: none; color: var(--text-primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: var(--transition); }
+        .stats-header h2 { font-size: 1.3rem; font-weight: 800; transition: color 0.5s ease;}
+        .btn-close { background: var(--border-light); border: none; color: var(--text-primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: background-color 0.3s ease, color 0.3s ease; }
         .btn-close:hover { background: var(--danger-bg); color: var(--danger); }
-        .stats-group-title { font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 800; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px; letter-spacing: 0.5px; }
-        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem; font-weight: 500; }
-        .stats-row strong { color: var(--primary); font-weight: 800; }
+        .stats-group-title { font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 800; margin: 16px 0 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px; letter-spacing: 0.5px; transition: border-color 0.5s ease, color 0.5s ease;}
+        .stats-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem; font-weight: 500; transition: color 0.5s ease;}
+        .stats-row strong { color: var(--primary); font-weight: 800; transition: filter 0.4s ease, color 0.5s ease;}
+
+        /* DIÁLOGOS CUSTOMIZADOS (Confirmação e Alertas) */
+        .custom-dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--surface); backdrop-filter: blur(16px); width: 85%; max-width: 320px; border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border-light); box-shadow: var(--shadow-lg); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); text-align: center; }
+        .dialog-open .custom-dialog { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+        .custom-dialog h3 { font-size: 1.25rem; margin-bottom: 10px; color: var(--text-primary); font-weight: 800; letter-spacing: -0.3px; transition: color 0.5s ease;}
+        .custom-dialog p { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.4; transition: color 0.5s ease;}
+        .dialog-buttons { display: flex; gap: 12px; justify-content: center; }
+        .btn-dialog { flex: 1; padding: 14px; border-radius: var(--radius-md); font-weight: 700; border: none; cursor: pointer; transition: transform 0.3s ease, background-color 0.3s ease; font-size: 0.95rem; }
+        .btn-cancel { background: transparent; color: var(--text-primary); border: 1px solid var(--border-light); }
+        .btn-cancel:hover { background: rgba(148, 163, 184, 0.1); }
+        .btn-confirm { background: var(--primary); color: white; }
+        .btn-confirm:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-confirm.danger { background: var(--danger); }
+        .btn-confirm.danger:hover { background: #dc2626; transform: translateY(-2px); }
 
         @media (min-width: 850px) {
             .app-container { max-width: 1300px; padding: 40px 32px; }
@@ -166,25 +193,25 @@
             
             <div class="left-panel">
                 <header class="app-header">
-                    <h1>💼 Diárias Pro</h1>
+                    <h1>💼 Diárias</h1>
                     <div class="header-actions">
                         <button class="icon-btn" id="btnThemeToggle" onclick="toggleTemaManual()" title="Mudar Tema">☀️</button>
-                        <button class="icon-btn" onclick="abrirBottomSheet('exportar')" title="Exportar PDF">📄</button>
+                        <button class="icon-btn" onclick="abrirBottomSheet('exportar')" title="Gerar Relatório/Print">📄</button>
                         <button class="icon-btn" onclick="mostrarEstatisticas()" title="Relatório Geral">📈</button>
                     </div>
                 </header>
 
                 <div class="stats-grid">
-                    <div class="stat-card primary">
+                    <div class="stat-card primary" onclick="togglePrivacy(event)" style="cursor: pointer;" title="Tocar para mostrar/esconder valores">
                         <div class="stat-icon">💰</div>
                         <div class="stat-label">Total do Mês</div>
-                        <div class="stat-value" id="totalMesAtual">R$ 0,00</div>
+                        <div class="stat-value hideable-value" id="totalMesAtual">R$ 0,00</div>
                         <div class="stat-trend" id="tendenciaMes"></div>
                     </div>
                     <div class="stat-card" onclick="mostrarPendentes()" style="cursor: pointer;" title="Clique para ver pendentes">
                         <div class="stat-icon">⏳</div>
                         <div class="stat-label">A Receber</div>
-                        <div class="stat-value" id="saldoReceber">R$ 0,00</div>
+                        <div class="stat-value hideable-value" id="saldoReceber">R$ 0,00</div>
                         <div class="stat-trend" id="diasRestantes"></div>
                     </div>
                 </div>
@@ -231,12 +258,8 @@
                 <div class="filter-section">
                     <h3 class="filter-title">📋 Lançamentos</h3>
                     <div class="filter-actions">
-                        <button class="filter-btn" onclick="copiarLista()" title="Copiar Lançamentos para Área de Transferência">
-                            📋 Copiar
-                        </button>
-                        <button class="filter-btn" onclick="abrirBottomSheet('servicos')" title="Resumo por Serviço">
-                            🏷️ Serviços
-                        </button>
+                        <button class="filter-btn" onclick="copiarLista()" title="Copiar Lançamentos">📋 Copiar</button>
+                        <button class="filter-btn" onclick="abrirBottomSheet('servicos')" title="Resumo por Serviço">🏷️ Serviços</button>
                         <button class="filter-btn" onclick="abrirBottomSheet('filtro')">
                             <span id="filtroLabel">Meses</span>
                             <span>▼</span>
@@ -252,6 +275,12 @@
 
     <div class="modal-overlay" onclick="fecharModais()"></div>
     
+    <div class="custom-dialog" id="customDialog">
+        <h3 id="dialogTitle">Título</h3>
+        <p id="dialogMessage">Mensagem</p>
+        <div class="dialog-buttons" id="dialogButtons"></div>
+    </div>
+
     <div class="bottom-sheet" id="dynamicSheet">
         <div class="sheet-handle"></div>
         <div class="sheet-title" id="sheetTitle">Opções</div>
@@ -267,31 +296,66 @@
     </div>
 
     <script>
-        // ============ SISTEMA DE TEMA MANUAL (BLINDADO) ============
-        // Executa imediatamente ao abrir o app
-        const btnTheme = document.getElementById('btnThemeToggle');
-        
-        function carregarTema() {
-            const temaSalvo = localStorage.getItem('theme_diarias');
-            if (temaSalvo === 'light') {
-                document.body.classList.add('light-mode');
-                btnTheme.textContent = '🌙';
-            } else {
-                document.body.classList.remove('light-mode');
-                btnTheme.textContent = '☀️';
+        // ============ SISTEMA DE DIÁLOGOS CUSTOMIZADOS ============
+        function showDialog(title, message, type = 'alert', onConfirm = null) {
+            fecharModais(); 
+            document.getElementById('dialogTitle').textContent = title;
+            document.getElementById('dialogMessage').innerHTML = message;
+            
+            const btnContainer = document.getElementById('dialogButtons');
+            
+            if (type === 'confirm') {
+                btnContainer.innerHTML = `
+                    <button class="btn-dialog btn-cancel" onclick="closeDialog()">Cancelar</button>
+                    <button class="btn-dialog btn-confirm" id="btnDialogConfirm">Confirmar</button>
+                `;
+                document.getElementById('btnDialogConfirm').onclick = () => { closeDialog(); if(onConfirm) onConfirm(); };
+            } else if (type === 'danger') {
+                btnContainer.innerHTML = `
+                    <button class="btn-dialog btn-cancel" onclick="closeDialog()">Cancelar</button>
+                    <button class="btn-dialog btn-confirm danger" id="btnDialogConfirm">Excluir</button>
+                `;
+                document.getElementById('btnDialogConfirm').onclick = () => { closeDialog(); if(onConfirm) onConfirm(); };
+            } else { 
+                btnContainer.innerHTML = `<button class="btn-dialog btn-confirm" onclick="closeDialog()">OK</button>`;
             }
+            
+            setTimeout(() => { document.body.classList.add('dialog-open'); }, 50);
         }
-        
+
+        function closeDialog() { document.body.classList.remove('dialog-open'); }
+        function fecharModais() { 
+            document.body.classList.remove('modal-open');
+            document.body.classList.remove('stats-open');
+            closeDialog(); 
+        }
+
+        // ============ SISTEMA DE TEMA E PRIVACIDADE ============
+        const btnTheme = document.getElementById('btnThemeToggle');
+        function carregarTema() {
+            if (localStorage.getItem('theme_diarias') === 'light') { document.body.classList.add('light-mode'); btnTheme.textContent = '🌙'; } 
+            else { document.body.classList.remove('light-mode'); btnTheme.textContent = '☀️'; }
+        }
         function toggleTemaManual() {
             const isLightAgora = document.body.classList.toggle('light-mode');
             localStorage.setItem('theme_diarias', isLightAgora ? 'light' : 'dark');
             btnTheme.textContent = isLightAgora ? '🌙' : '☀️';
         }
-        carregarTema(); // Inicia o tema correto na hora
+        carregarTema();
 
-        // ============ LÓGICA DO APP ============
+        let privacyMode = localStorage.getItem('privacy_diarias') === 'true';
+        function applyPrivacy() {
+            if (privacyMode) document.body.classList.add('privacy-active');
+            else document.body.classList.remove('privacy-active');
+        }
+        function togglePrivacy(e) {
+            if (e) e.stopPropagation();
+            privacyMode = !privacyMode; localStorage.setItem('privacy_diarias', privacyMode); applyPrivacy();
+        }
+        applyPrivacy();
+
+        // ============ LÓGICA PRINCIPAL ============
         let diarias = JSON.parse(localStorage.getItem('minhas_diarias_pro')) || [];
-        
         diarias = diarias.map(d => ({
             id: d.id || Date.now() + Math.random(),
             data: d.data || new Date().toISOString().split('T')[0],
@@ -302,131 +366,84 @@
         }));
 
         let filtroAtual = 'todos';
-        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
-                           "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-
+        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
         const formatCurrency = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const formatDate = (dataStr) => { const [y, m, d] = dataStr.split('-'); return `${d}/${m}/${y}`; };
         const formatShortDate = (dataStr) => { const [y, m, d] = dataStr.split('-'); return `${d}/${m}`; };
         const getMonthYear = (dataStr) => { const [y, m] = dataStr.split('-'); return `${nomesMeses[parseInt(m) - 1]} ${y}`; };
-        const getDiaSemana = (dataStr) => {
-            const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            return dias[new Date(dataStr + 'T12:00:00').getDay()];
-        };
+        const getDiaSemana = (dataStr) => { const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']; return dias[new Date(dataStr + 'T12:00:00').getDay()]; };
 
         document.getElementById('data').valueAsDate = new Date();
-
         function salvarDados() { localStorage.setItem('minhas_diarias_pro', JSON.stringify(diarias)); }
 
-        // ============ SISTEMA DE SUGESTÕES CUSTOMIZADO ============
+        // ============ SISTEMA DE SUGESTÕES ============
         const inputAtividade = document.getElementById('atividade');
         const boxSugestoes = document.getElementById('sugestoesContainer');
-
-        function getCategoriasUnicas() {
-            return [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort();
-        }
-
+        function getCategoriasUnicas() { return [...new Set(diarias.map(d => d.atividade.trim()))].filter(Boolean).sort(); }
         function renderizarSugestoes(filtro = '') {
-            const categorias = getCategoriasUnicas();
-            const filtradas = categorias.filter(c => c.toLowerCase().includes(filtro.toLowerCase()));
-            
-            if (filtradas.length === 0) {
-                boxSugestoes.style.display = 'none';
-                return;
-            }
-
+            const filtradas = getCategoriasUnicas().filter(c => c.toLowerCase().includes(filtro.toLowerCase()));
+            if (filtradas.length === 0) return boxSugestoes.style.display = 'none';
             let html = '';
-            filtradas.forEach(cat => {
-                html += `<div class="sugestao-item" onclick="selecionarSugestao('${cat}')">${cat}</div>`;
-            });
-            boxSugestoes.innerHTML = html;
-            boxSugestoes.style.display = 'block';
+            filtradas.forEach(cat => { html += `<div class="sugestao-item" onclick="selecionarSugestao('${cat}')">${cat}</div>`; });
+            boxSugestoes.innerHTML = html; boxSugestoes.style.display = 'block';
         }
-
-        function selecionarSugestao(valor) {
-            inputAtividade.value = valor;
-            boxSugestoes.style.display = 'none';
-            inputAtividade.focus();
-        }
-
+        function selecionarSugestao(valor) { inputAtividade.value = valor; boxSugestoes.style.display = 'none'; inputAtividade.focus(); }
         inputAtividade.addEventListener('focus', (e) => { renderizarSugestoes(e.target.value); });
         inputAtividade.addEventListener('input', (e) => { renderizarSugestoes(e.target.value); });
+        document.addEventListener('click', (e) => { if (e.target !== inputAtividade && e.target !== boxSugestoes) boxSugestoes.style.display = 'none'; });
 
-        document.addEventListener('click', (e) => {
-            if (e.target !== inputAtividade && e.target !== boxSugestoes) {
-                boxSugestoes.style.display = 'none';
-            }
-        });
-        // ==========================================================
-
+        // ============ AÇÕES DE DIÁRIAS (COM DIÁLOGO CUSTOMIZADO) ============
         function adicionarDiaria(diaria) {
-            diarias.push(diaria);
+            diarias.push(diaria); 
             diarias.sort((a, b) => new Date(b.data) - new Date(a.data));
             salvarDados();
         }
 
-        function toggleStatus(id) {
-            const index = diarias.findIndex(d => d.id === id);
-            if (index > -1) {
-                diarias[index].recebido = !diarias[index].recebido;
-                salvarDados();
-                renderizarApp();
-            }
+        function confirmarToggleStatus(id) {
+            const item = diarias.find(d => d.id === id);
+            if (!item) return;
+            const titulo = item.recebido ? "Voltar para Pendente?" : "Marcar como Recebido?";
+            const msg = `Deseja alterar o status do serviço <b>${item.atividade}</b> de ${formatCurrency(item.valor)}?`;
+            
+            showDialog(titulo, msg, 'confirm', () => {
+                item.recebido = !item.recebido;
+                salvarDados(); renderizarApp();
+            });
         }
 
-        function deletarDiaria(id) {
-            if (confirm('Excluir este lançamento?')) {
+        function confirmarDeletarDiaria(id) {
+            showDialog("Excluir Serviço?", "Esta ação não pode ser desfeita. Tem certeza que deseja apagar?", "danger", () => {
                 diarias = diarias.filter(d => d.id !== id);
-                salvarDados();
-                renderizarApp();
-            }
+                salvarDados(); renderizarApp();
+            });
         }
 
         function calcularEstatisticas() {
-            const hoje = new Date();
-            const mesAtual = hoje.toISOString().slice(0, 7);
-            
+            const hoje = new Date(); const mesAtual = hoje.toISOString().slice(0, 7);
             let totalMes = 0; let totalPendente = 0; let totalRecebidoMes = 0;
             const diariasMesAtual = diarias.filter(d => d.data.startsWith(mesAtual));
             
             diarias.forEach(d => {
-                if (d.data.startsWith(mesAtual)) {
-                    totalMes += d.valor;
-                    if (d.recebido) totalRecebidoMes += d.valor;
-                }
+                if (d.data.startsWith(mesAtual)) { totalMes += d.valor; if (d.recebido) totalRecebidoMes += d.valor; }
                 if (!d.recebido) totalPendente += d.valor;
             });
 
-            const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString().slice(0, 7);
-            const totalMesAnterior = diarias.filter(d => d.data.startsWith(mesAnterior)).reduce((sum, d) => sum + d.valor, 0);
-            
-            let tendencia = 0; let tendenciaTexto = '';
-            if (totalMesAnterior > 0) {
-                tendencia = ((totalMes - totalMesAnterior) / totalMesAnterior) * 100;
-                tendenciaTexto = tendencia > 0 ? `↑ ${tendencia.toFixed(1)}% vs anterior` : `↓ ${Math.abs(tendencia).toFixed(1)}% vs anterior`;
-            }
-
             const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
-            const diasRestantes = ultimoDia - hoje.getDate();
-            const diasTrabalhadosMes = new Set(diariasMesAtual.map(d => d.data)).size;
-            
-            return { totalMes, totalPendente, totalRecebidoMes, tendencia, tendenciaTexto, diasRestantes, countDiariasMes: diariasMesAtual.length, diasTrabalhadosMes };
+            return { 
+                totalMes, totalPendente, totalRecebidoMes, 
+                diasRestantes: ultimoDia - hoje.getDate(), 
+                qtdPendentesGlobais: diarias.filter(d => !d.recebido).length, 
+                countDiariasMes: diariasMesAtual.length, 
+                diasTrabalhadosMes: new Set(diariasMesAtual.map(d => d.data)).size 
+            };
         }
 
         function renderizarApp() {
             const stats = calcularEstatisticas();
             document.getElementById('totalMesAtual').textContent = formatCurrency(stats.totalMes);
             document.getElementById('saldoReceber').textContent = formatCurrency(stats.totalPendente);
-            
-            const tendenciaEl = document.getElementById('tendenciaMes');
-            if (stats.tendenciaTexto) {
-                tendenciaEl.textContent = stats.tendenciaTexto;
-                tendenciaEl.className = `stat-trend ${stats.tendencia > 0 ? 'trend-up' : 'trend-down'}`;
-            } else { tendenciaEl.textContent = 'Mês inicial'; }
-            
-            document.getElementById('diasRestantes').textContent = `${stats.diasRestantes} dias restantes`;
+            document.getElementById('tendenciaMes').textContent = `📅 ${stats.diasRestantes} dias para o fim do mês`;
+            document.getElementById('diasRestantes').textContent = `📋 ${stats.qtdPendentesGlobais} diárias pendentes`;
             document.getElementById('contadorDiarias').textContent = `${diarias.length} diárias`;
-
             renderizarLista();
         }
 
@@ -435,11 +452,7 @@
             let diariasFiltradas = filtroAtual !== 'todos' ? diarias.filter(d => d.data.startsWith(filtroAtual)) : diarias;
 
             if (diariasFiltradas.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding:60px 20px; color:var(--text-secondary);">
-                        <div style="font-size:3.5rem; margin-bottom:16px;">📭</div>
-                        <div style="font-size:1.1rem; font-weight:700;">Nenhum registro encontrado</div>
-                    </div>`;
+                container.innerHTML = `<div style="text-align:center; padding:60px 20px; color:var(--text-secondary);"><div style="font-size:3.5rem; margin-bottom:16px;">📭</div><div style="font-size:1.1rem; font-weight:700;">Nenhum registro encontrado</div></div>`;
                 return;
             }
 
@@ -447,44 +460,40 @@
             diariasFiltradas.forEach(d => {
                 const chave = d.data.slice(0, 7);
                 if (!agrupado[chave]) agrupado[chave] = { label: getMonthYear(d.data).split(' ')[0], itens: [], total: 0 };
-                agrupado[chave].itens.push(d);
-                agrupado[chave].total += d.valor;
+                agrupado[chave].itens.push(d); agrupado[chave].total += d.valor;
             });
 
             container.innerHTML = '';
-            
+            // Meses ordenados do mais recente para o mais antigo
             Object.keys(agrupado).sort((a, b) => b.localeCompare(a)).forEach(chave => {
                 const grupo = agrupado[chave];
                 const monthSection = document.createElement('div');
-                monthSection.innerHTML = `
-                    <div class="month-header">
-                        <span class="month-name">${grupo.label}</span>
-                        <span class="month-total">Total ${grupo.label} ${grupo.total.toFixed(2).replace('.', ',')}</span>
-                    </div>`;
-
-                grupo.itens.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(item => {
-                    monthSection.appendChild(criarElementoDiaria(item));
+                monthSection.innerHTML = `<div class="month-header"><span class="month-name">${grupo.label}</span><span class="month-total hideable-value">Total ${grupo.label} ${grupo.total.toFixed(2).replace('.', ',')}</span></div>`;
+                
+                // ORDENAÇÃO: Mais recentes no topo (b.data - a.data)
+                grupo.itens.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(item => { 
+                    monthSection.appendChild(criarElementoDiaria(item)); 
                 });
                 container.appendChild(monthSection);
             });
         }
 
         function criarElementoDiaria(item) {
-            const div = document.createElement('div');
-            div.className = `list-item-clean`;
+            const div = document.createElement('div'); div.className = `list-item-clean`;
             
-            const textColor = item.recebido ? 'var(--text-secondary)' : 'var(--text-primary)';
-            const textDecor = item.recebido ? 'text-decoration: line-through; opacity: 0.7;' : '';
+            // COR VERDE SUAVE: Se pago, usa a cor primária (verde), senão usa a cor normal do texto
+            const textColor = item.recebido ? 'var(--primary)' : 'var(--text-primary)';
+            const textDecor = item.recebido ? 'text-decoration: line-through; opacity: 0.8;' : '';
 
             div.innerHTML = `
-                <div class="text-content" onclick="toggleStatus(${item.id})">
+                <div class="text-content" onclick="confirmarToggleStatus(${item.id})">
                     <span style="color: var(--text-secondary); min-width: 45px;">${formatShortDate(item.data)}</span> 
                     <span style="color: var(--text-secondary);"> - </span>
                     <span style="color: ${textColor}; ${textDecor}">${item.atividade}</span>
-                    <span style="margin-left: 2px; color: ${textColor}; ${textDecor}">${item.valor.toFixed(2).replace('.', ',')}</span>
+                    <span style="margin-left: 2px; color: ${textColor}; ${textDecor}" class="item-value hideable-value">${item.valor.toFixed(2).replace('.', ',')}</span>
                     ${item.recebido ? '<span style="margin-left: 4px; font-size: 1.1rem;">✅</span>' : ''}
                 </div>
-                <button class="btn-delete-clean" onclick="deletarDiaria(${item.id})" title="Excluir">🗑️</button>
+                <button class="btn-delete-clean" onclick="confirmarDeletarDiaria(${item.id})" title="Excluir">🗑️</button>
             `;
             return div;
         }
@@ -493,40 +502,31 @@
             let texto = "";
             let diariasFiltradas = filtroAtual !== 'todos' ? diarias.filter(d => d.data.startsWith(filtroAtual)) : diarias;
 
-            if (diariasFiltradas.length === 0) return alert("Nada para copiar.");
+            if (diariasFiltradas.length === 0) return showDialog("Opa!", "Não há nada para copiar neste mês.", "alert");
 
             const agrupado = {};
             diariasFiltradas.forEach(d => {
                 const chave = d.data.slice(0, 7);
                 if (!agrupado[chave]) agrupado[chave] = { label: getMonthYear(d.data).split(' ')[0], itens: [], total: 0 };
-                agrupado[chave].itens.push(d);
-                agrupado[chave].total += d.valor;
+                agrupado[chave].itens.push(d); agrupado[chave].total += d.valor;
             });
 
             Object.keys(agrupado).sort((a, b) => b.localeCompare(a)).forEach(chave => {
-                const grupo = agrupado[chave];
-                texto += `${grupo.label}\n\n`;
-
-                grupo.itens.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(item => {
+                const grupo = agrupado[chave]; texto += `${grupo.label}\n\n`;
+                // ORDENAÇÃO: Mais recentes no topo também na cópia (b.data - a.data)
+                grupo.itens.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(item => {
                     const check = item.recebido ? ' ✅' : '';
                     texto += `${formatShortDate(item.data)} - ${item.atividade} ${item.valor.toFixed(2).replace('.', ',')}${check}\n`;
                 });
-
                 texto += `\nTotal ${grupo.label} ${grupo.total.toFixed(2).replace('.', ',')}\n\n`;
             });
 
             try {
                 await navigator.clipboard.writeText(texto.trim());
-                alert("📋 Lista copiada com sucesso!\nPronta para colar no WhatsApp.");
+                showDialog("Sucesso! 📋", "A lista foi copiada.<br>Abra o WhatsApp e cole a mensagem.", "alert");
             } catch (err) {
-                alert("Erro ao copiar. Tente selecionar o texto manualmente.");
+                showDialog("Erro ao Copiar", "Não foi possível copiar automaticamente. O aplicativo pode estar bloqueando a ação.", "alert");
             }
-        }
-
-        /* ==== SISTEMA DE MODAIS DINÂMICOS ==== */
-        function fecharModais() { 
-            document.body.classList.remove('modal-open');
-            document.body.classList.remove('stats-open');
         }
 
         function mostrarEstatisticas() {
@@ -539,37 +539,31 @@
 
             document.getElementById('statsModalBody').innerHTML = `
                 <div class="stats-group-title">Neste Mês</div>
-                <div class="stats-row"><span>💵 Lançado:</span> <strong>${formatCurrency(stats.totalMes)}</strong></div>
-                <div class="stats-row"><span>✓ Recebido:</span> <strong>${formatCurrency(stats.totalRecebidoMes)}</strong></div>
+                <div class="stats-row"><span>💵 Lançado:</span> <strong class="hideable-value">${formatCurrency(stats.totalMes)}</strong></div>
+                <div class="stats-row"><span>✓ Recebido:</span> <strong class="hideable-value">${formatCurrency(stats.totalRecebidoMes)}</strong></div>
                 <div class="stats-row"><span>📅 Trabalhado:</span> <strong>${stats.diasTrabalhadosMes} dias</strong></div>
                 <div class="stats-row"><span>📋 Diárias:</span> <strong>${stats.countDiariasMes} itens</strong></div>
 
                 <div class="stats-group-title">Relatório Geral</div>
-                <div class="stats-row"><span>💰 Total Bruto:</span> <strong>${formatCurrency(totalGeral)}</strong></div>
-                <div class="stats-row"><span>✅ Total Recebido:</span> <strong>${formatCurrency(totalRecebido)}</strong></div>
-                <div class="stats-row"><span>⏳ A Receber:</span> <strong style="color: var(--warning)">${formatCurrency(stats.totalPendente)}</strong></div>
-                <div class="stats-row"><span>📈 Média/Diária:</span> <strong>${formatCurrency(mediaDiaria)}</strong></div>
+                <div class="stats-row"><span>💰 Total Bruto:</span> <strong class="hideable-value">${formatCurrency(totalGeral)}</strong></div>
+                <div class="stats-row"><span>✅ Total Recebido:</span> <strong class="hideable-value">${formatCurrency(totalRecebido)}</strong></div>
+                <div class="stats-row"><span>⏳ A Receber:</span> <strong style="color: var(--warning)" class="hideable-value">${formatCurrency(stats.totalPendente)}</strong></div>
+                <div class="stats-row"><span>📈 Média/Diária:</span> <strong class="hideable-value">${formatCurrency(mediaDiaria)}</strong></div>
             `;
             document.body.classList.add('stats-open');
         }
 
         function mostrarPendentes() {
             document.getElementById('statsModalTitle').textContent = '⏳ Valores A Receber';
-            const pendentes = diarias.filter(d => !d.recebido).sort((a, b) => new Date(a.data) - new Date(b.data));
+            // ORDENAÇÃO: Mais recentes no topo (b.data - a.data)
+            const pendentes = diarias.filter(d => !d.recebido).sort((a, b) => new Date(b.data) - new Date(a.data));
 
             if (pendentes.length === 0) {
                 document.getElementById('statsModalBody').innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Tudo em dia! 🎉 Nenhuma diária pendente.</div>`;
             } else {
                 let html = '<div style="max-height: 60vh; overflow-y: auto;">';
                 pendentes.forEach(d => {
-                    html += `
-                        <div class="stats-row" style="border-bottom: 1px solid var(--border-light); padding-bottom: 8px; margin-bottom: 8px;">
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-size: 0.85rem; color: var(--text-secondary);">${formatShortDate(d.data)} - ${getDiaSemana(d.data)}</span>
-                                <span style="font-weight: 600;">${d.atividade}</span>
-                            </div>
-                            <strong style="color: var(--warning); display:flex; align-items:center;">${formatCurrency(d.valor)}</strong>
-                        </div>`;
+                    html += `<div class="stats-row" style="border-bottom: 1px solid var(--border-light); padding-bottom: 8px; margin-bottom: 8px;"><div style="display: flex; flex-direction: column;"><span style="font-size: 0.85rem; color: var(--text-secondary);">${formatShortDate(d.data)} - ${getDiaSemana(d.data)}</span><span style="font-weight: 600;">${d.atividade}</span></div><strong style="color: var(--warning); display:flex; align-items:center;" class="hideable-value">${formatCurrency(d.valor)}</strong></div>`;
                 });
                 html += '</div>';
                 document.getElementById('statsModalBody').innerHTML = html;
@@ -578,213 +572,113 @@
         }
 
         function mostrarResumoServico(nomeServico) {
-            fecharModais(); 
-            document.getElementById('statsModalTitle').textContent = '🏷️ Categoria';
-
+            fecharModais(); document.getElementById('statsModalTitle').textContent = '🏷️ Detalhes da Categoria';
             const relatoriosDoServico = diarias.filter(d => d.atividade.trim() === nomeServico);
             const totalBruto = relatoriosDoServico.reduce((sum, d) => sum + d.valor, 0);
             const totalRecebido = relatoriosDoServico.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
             const totalPendente = totalBruto - totalRecebido;
             const diasTrabalhados = new Set(relatoriosDoServico.map(d => d.data)).size;
 
-            let historicoHtml = '';
-            const recentes = relatoriosDoServico.sort((a,b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
-            recentes.forEach(d => {
-                historicoHtml += `
-                    <div class="stats-row" style="font-weight: normal; font-size: 0.9rem;">
-                        <span>${formatShortDate(d.data)} - ${getDiaSemana(d.data)}</span>
-                        <strong style="color: ${d.recebido ? 'var(--primary)' : 'var(--warning)'}">${formatCurrency(d.valor)}</strong>
-                    </div>`;
-            });
+            // ORDENAÇÃO: Mais recentes no topo (b.data - a.data)
+            const pendentes = relatoriosDoServico.filter(d => !d.recebido).sort((a,b) => new Date(b.data) - new Date(a.data));
+            let pendentesHtml = '';
+            if(pendentes.length === 0) { pendentesHtml = '<div style="text-align:center; color: var(--text-secondary); font-size:0.9rem; margin-top: 10px;">Nenhuma diária pendente! 🎉</div>'; } else {
+                pendentesHtml = '<div style="max-height: 25vh; overflow-y: auto;">';
+                pendentes.forEach(d => { pendentesHtml += `<div class="stats-row" style="font-weight: normal; font-size: 0.9rem; border-bottom: 1px solid var(--border-light); padding-bottom: 4px;"><span>${formatShortDate(d.data)} - ${getDiaSemana(d.data)}</span><strong style="color: var(--warning)" class="hideable-value">${formatCurrency(d.valor)}</strong></div>`; });
+                pendentesHtml += '</div>';
+            }
 
             document.getElementById('statsModalBody').innerHTML = `
-                <div style="text-align:center; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.4rem; color: var(--text-primary);">${nomeServico}</h3>
-                </div>
-                
+                <div style="text-align:center; margin-bottom: 20px;"><h3 style="font-size: 1.4rem; color: var(--text-primary);">${nomeServico}</h3></div>
                 <div class="stats-group-title">Resumo Financeiro</div>
-                <div class="stats-row"><span>💰 Gerado:</span> <strong>${formatCurrency(totalBruto)}</strong></div>
-                <div class="stats-row"><span>✅ Recebido:</span> <strong>${formatCurrency(totalRecebido)}</strong></div>
-                <div class="stats-row"><span>⏳ Pendente:</span> <strong style="color: var(--warning)">${formatCurrency(totalPendente)}</strong></div>
-                <div class="stats-row"><span>📅 Trabalhado:</span> <strong>${diasTrabalhados} dias</strong></div>
-
-                <div class="stats-group-title">Últimos Registros</div>
-                ${historicoHtml}
-                ${relatoriosDoServico.length > 5 ? `<div style="text-align:center; font-size: 0.75rem; color: var(--text-secondary); margin-top: 10px;">Exibindo os 5 mais recentes</div>` : ''}
+                <div class="stats-row"><span>💰 Total Histórico:</span> <strong class="hideable-value">${formatCurrency(totalBruto)}</strong></div>
+                <div class="stats-row"><span>✅ Já Recebido:</span> <strong class="hideable-value">${formatCurrency(totalRecebido)}</strong></div>
+                <div class="stats-row"><span>📅 Trabalhado:</span> <strong>${diasTrabalhados} dias totais</strong></div>
+                <div class="stats-group-title" style="margin-top: 20px; border-bottom: 2px solid var(--warning); padding-bottom: 4px; color: var(--text-primary);">⏳ Faltam Receber: <span class="hideable-value">${formatCurrency(totalPendente)}</span></div>
+                ${pendentesHtml}
             `;
             setTimeout(() => { document.body.classList.add('stats-open'); }, 100);
         }
 
-        function setFiltro(valor, label) { 
-            filtroAtual = valor; 
-            document.getElementById('filtroLabel').textContent = label; 
-            fecharModais(); 
-            renderizarApp(); 
-        }
+        function setFiltro(valor, label) { filtroAtual = valor; document.getElementById('filtroLabel').textContent = label; fecharModais(); renderizarApp(); }
 
         function abrirBottomSheet(tipo) {
-            const titleEl = document.getElementById('sheetTitle');
-            const container = document.getElementById('sheetOptions');
-            const meses = new Map();
-            diarias.forEach(d => { const chave = d.data.slice(0, 7); if (!meses.has(chave)) meses.set(chave, getMonthYear(d.data)); });
-
+            const titleEl = document.getElementById('sheetTitle'); const container = document.getElementById('sheetOptions');
+            const meses = new Map(); diarias.forEach(d => { const chave = d.data.slice(0, 7); if (!meses.has(chave)) meses.set(chave, getMonthYear(d.data)); });
             let html = '';
 
             if (tipo === 'filtro') {
                 titleEl.textContent = 'Filtrar por período';
-                html += `<div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Meses')">
-                            <span>📅 Meses</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
-                         </div>`;
+                html += `<div class="sheet-option ${filtroAtual === 'todos' ? 'selected' : ''}" onclick="setFiltro('todos', 'Meses')"><span>📅 Meses</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span></div>`;
                 Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
                     const count = diarias.filter(d => d.data.startsWith(chave)).length;
-                    html += `<div class="sheet-option ${filtroAtual === chave ? 'selected' : ''}" onclick="setFiltro('${chave}', '${label}')">
-                                <span>${label}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span>
-                             </div>`;
+                    html += `<div class="sheet-option ${filtroAtual === chave ? 'selected' : ''}" onclick="setFiltro('${chave}', '${label}')"><span>${label}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span></div>`;
                 });
             } else if (tipo === 'exportar') {
-                titleEl.textContent = 'Exportar PDF de qual período?';
-                html += `<div class="sheet-option" onclick="gerarPDF('todos', 'Relatório Geral')">
-                            <span>📑 Relatório Completo</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span>
-                         </div>`;
+                titleEl.textContent = 'Gerar Relatório de qual período?';
+                html += `<div class="sheet-option" onclick="gerarComprovante('todos', 'Relatório Geral')"><span>📑 Relatório Completo</span> <span style="font-size: 0.85rem; opacity: 0.8;">${diarias.length} itens</span></div>`;
                 Array.from(meses.entries()).sort((a, b) => b[0].localeCompare(a[0])).forEach(([chave, label]) => {
                     const count = diarias.filter(d => d.data.startsWith(chave)).length;
-                    html += `<div class="sheet-option" onclick="gerarPDF('${chave}', '${label}')">
-                                <span>📅 ${label}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span>
-                             </div>`;
+                    html += `<div class="sheet-option" onclick="gerarComprovante('${chave}', '${label}')"><span>📅 ${label}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} itens</span></div>`;
                 });
             } else if (tipo === 'servicos') {
                 titleEl.textContent = 'Escolha o Serviço';
                 const categoriasUnicas = getCategoriasUnicas();
-                
-                if (categoriasUnicas.length === 0) {
-                    html = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Nenhum serviço registrado ainda.</div>`;
-                } else {
+                if (categoriasUnicas.length === 0) { html = `<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Nenhum serviço registrado ainda.</div>`; } else {
                     categoriasUnicas.forEach(cat => {
                         const count = diarias.filter(d => d.atividade.trim() === cat).length;
-                        html += `<div class="sheet-option" onclick="mostrarResumoServico('${cat}')">
-                                    <span>🏷️ ${cat}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} registros</span>
-                                 </div>`;
+                        html += `<div class="sheet-option" onclick="mostrarResumoServico('${cat}')"><span>🏷️ ${cat}</span> <span style="font-size: 0.85rem; opacity: 0.8;">${count} registros totais</span></div>`;
                     });
                 }
             }
-
-            container.innerHTML = html;
-            document.body.classList.add('modal-open');
+            container.innerHTML = html; document.body.classList.add('modal-open');
         }
 
-        // ============ SISTEMA DE PDF BLINDADO ============
-        async function gerarPDF(periodoChave, periodoLabel) {
+        // ============ COMPROVANTE VISUAL ============
+        function gerarComprovante(periodoChave, periodoLabel) {
             fecharModais(); 
             let dadosExportacao = diarias;
-            let subtitulo = periodoLabel;
-
-            if (periodoChave !== 'todos') {
-                dadosExportacao = diarias.filter(d => d.data.startsWith(periodoChave));
-            }
-
-            if (dadosExportacao.length === 0) return alert("Não há diárias registradas para este período.");
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const isDarkMode = document.body.classList.contains('light-mode') === false;
-
-            const theme = {
-                bgColor: isDarkMode ? [15, 23, 42] : [255, 255, 255],
-                titleColor: isDarkMode ? [248, 250, 252] : [15, 23, 42],
-                textBase: isDarkMode ? [148, 163, 184] : [71, 85, 105],
-                headBg: isDarkMode ? [30, 41, 59] : [241, 245, 249],
-                headText: isDarkMode ? [248, 250, 252] : [30, 41, 59],
-                rowBg: isDarkMode ? [15, 23, 42] : [255, 255, 255],
-                altRowBg: isDarkMode ? [30, 41, 59] : [248, 250, 252],
-                paidText: [52, 211, 153],
-                pendingText: [245, 158, 11]
-            };
-
-            if (isDarkMode) {
-                doc.setFillColor(...theme.bgColor);
-                doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, 'F');
-            }
+            if (periodoChave !== 'todos') { dadosExportacao = diarias.filter(d => d.data.startsWith(periodoChave)); }
+            if (dadosExportacao.length === 0) return showDialog("Opa!", "Não há diárias registradas para este período.", "alert");
 
             const totalGeral = dadosExportacao.reduce((sum, d) => sum + d.valor, 0);
             const totalRecebido = dadosExportacao.filter(d => d.recebido).reduce((sum, d) => sum + d.valor, 0);
             const totalPendente = totalGeral - totalRecebido;
 
-            doc.setTextColor(...theme.titleColor);
-            doc.setFontSize(18);
-            doc.setFont(undefined, 'bold');
-            doc.text('Relatório de Diárias Pro', 14, 22);
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            doc.text(subtitulo, 14, 28);
-            doc.setFontSize(10);
-            doc.setTextColor(...theme.textBase);
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 38);
-            doc.text(`Faturamento Total: ${formatCurrency(totalGeral)}`, 14, 44);
-            doc.text(`Total Recebido: ${formatCurrency(totalRecebido)}`, 14, 50);
-            doc.text(`Pendente a Receber: ${formatCurrency(totalPendente)}`, 14, 56);
-
-            const dadosTabela = [...dadosExportacao]
-                .sort((a, b) => new Date(b.data) - new Date(a.data))
-                .map(d => [formatDate(d.data), d.atividade, formatCurrency(d.valor), d.recebido ? 'Recebido' : 'Pendente']);
-
-            doc.autoTable({
-                startY: 65,
-                head: [['Data', 'Atividade', 'Valor', 'Status']],
-                body: dadosTabela,
-                theme: 'plain',
-                styles: { fontSize: 10, cellPadding: 5, textColor: theme.textBase },
-                headStyles: { fillColor: theme.headBg, textColor: theme.headText, fontStyle: 'bold' },
-                bodyStyles: { fillColor: theme.rowBg },
-                alternateRowStyles: { fillColor: theme.altRowBg },
-                didParseCell: function(data) {
-                    if (data.section === 'body') {
-                        if (data.column.index === 2) data.cell.styles.fontStyle = 'bold';
-                        if (data.column.index === 3) {
-                            data.cell.styles.fontStyle = 'bold';
-                            if (data.cell.raw === 'Recebido') data.cell.styles.textColor = theme.paidText;
-                            else data.cell.styles.textColor = theme.pendingText;
-                        }
-                    }
-                }
+            let listaHtml = '';
+            // ORDENAÇÃO: Mais recentes no topo (b.data - a.data)
+            dadosExportacao.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(d => {
+                const iconeStatus = d.recebido ? '✅' : '⏳';
+                listaHtml += `<div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.2); padding: 6px 0;"><span style="flex:1; padding-right: 10px;">${formatShortDate(d.data)} - ${d.atividade}</span><span style="white-space: nowrap; font-weight: bold;" class="hideable-value">${formatCurrency(d.valor)} <span style="font-size:0.8rem">${iconeStatus}</span></span></div>`;
             });
 
-            let sulfixoArquivo = periodoChave === 'todos' ? 'Geral' : periodoLabel.replace(' ', '_');
-            const fileName = `Diarias_${sulfixoArquivo}.pdf`;
-
-            try {
-                // Tenta compartilhar nativamente (Funciona no navegador e em alguns apps)
-                if (navigator.share && navigator.canShare) {
-                    const pdfBlob = doc.output('blob');
-                    const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-                    if (navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], title: 'Relatório', text: `Relatório: ${periodoLabel}` });
-                        return;
-                    }
-                }
-                
-                // Se não deu pra compartilhar, força erro pra cair no Catch (Visualizador embutido)
-                throw new Error("Compartilhamento bloqueado pelo WebView.");
-                
-            } catch (err) { 
-                // SOLUÇÃO PARA O KODULAR: Em vez de baixar e sumir, abre o PDF na cara do usuário!
-                const base64PDF = doc.output('datauristring');
-                
-                document.getElementById('statsModalTitle').textContent = '📄 Visualizador de PDF';
-                document.getElementById('statsModalBody').innerHTML = `
-                    <div style="font-size: 0.85rem; color: var(--warning); text-align: center; margin-bottom: 12px; font-weight: bold;">
-                        Visualização ativada. Tire um print ou use o botão de compartilhar.
+            document.getElementById('statsModalTitle').textContent = '📄 Relatório Formatado';
+            document.getElementById('statsModalBody').innerHTML = `
+                <div style="background: #ffffff; color: #000000; padding: 18px; border-radius: 12px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); max-height: 55vh; overflow-y: auto;">
+                    <div style="text-align: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 4px;">RELATÓRIO DE DIÁRIAS</div>
+                    <div style="text-align: center; margin-bottom: 16px; text-transform: uppercase; font-weight: bold;">[ ${periodoLabel} ]</div>
+                    
+                    <div style="border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 10px 0; margin-bottom: 12px; font-size: 0.95rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>FATURAMENTO:</span> <strong class="hideable-value">${formatCurrency(totalGeral)}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;"><span>RECEBIDO:</span> <strong style="color: #059669;" class="hideable-value">${formatCurrency(totalRecebido)}</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>A RECEBER:</span> <strong style="color: #ef4444;" class="hideable-value">${formatCurrency(totalPendente)}</strong></div>
                     </div>
-                    <iframe src="${base64PDF}" style="width: 100%; height: 55vh; border: none; border-radius: 8px; background: white;"></iframe>
-                `;
-                
-                document.body.classList.add('stats-open');
-            }
+                    
+                    <div style="font-weight: bold; margin-bottom: 6px;">LANÇAMENTOS DETALHADOS:</div>
+                    ${listaHtml}
+                    <div style="text-align: center; font-size: 0.7rem; color: #666; margin-top: 15px;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
+                </div>
+                <div style="text-align:center; font-size: 0.8rem; color: var(--text-secondary); margin-top: 15px;">
+                    Tire um print (captura de tela) desta página.
+                </div>
+            `;
+            setTimeout(() => { document.body.classList.add('stats-open'); }, 100);
         }
 
         document.getElementById('diariaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const valor = parseFloat(document.getElementById('valor').value);
-            if (valor <= 0) return alert('O valor deve ser maior que zero!');
+            if (valor <= 0) return showDialog('Atenção', 'O valor deve ser maior que zero!', 'alert');
             
             adicionarDiaria({
                 id: Date.now() + Math.floor(Math.random() * 1000),
