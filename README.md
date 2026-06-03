@@ -27,4 +27,4 @@ Como o projeto foi desenvolvido com tecnologias web nativas (Vanilla Web), não 
 
 1. Faça o clone deste repositório:
    ```bash
-   git clone [https://github.com/jeansnn/diarias-pro.git](https://github.com/jeansnn/diarias-pro.git)
+   git clone https://github.com/jeansnn/diarias-pro.git
