@@ -21,7 +21,7 @@ Um aplicativo web *mobile-first* simples, rápido e offline desenvolvido para o 
 
 ---
 
-## 🚀 Como Executar o Projeto
+## Como Executar o Projeto
 
 Como o projeto foi desenvolvido com tecnologias web nativas (Vanilla Web), não há necessidade de instalações complexas, dependências ou processos de *build*.
 
